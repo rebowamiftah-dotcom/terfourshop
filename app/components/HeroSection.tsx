@@ -127,14 +127,14 @@ export default function HeroSection() {
         <motion.h1 variants={itemVariants} className="max-w-4xl text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.15] mb-4">
           Masa Depan E-Commerce <br />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300">
-            Dalam Satu Sentuhan 3D
+            Bersama TerfourShop 
           </span>
         </motion.h1>
 
         {/* Sub-headline */}
         <motion.p variants={itemVariants} className="max-w-xl text-sm sm:text-base text-slate-300 mb-8 leading-relaxed font-light">
           Jelajahi produk eksklusif dengan pengalaman interaktif imersif. 
-          Belanja lebih cepat, interaktif, dan futuristik langsung dari perangkat Anda.
+          Belanja lebih cepat, interaktif, dan futuristik langsung dari browser Anda.
         </motion.p>
 
         {/* Call to Action Buttons */}
