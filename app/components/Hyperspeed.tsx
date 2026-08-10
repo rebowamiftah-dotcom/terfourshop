@@ -3,22 +3,22 @@
 
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { BloomEffect, EffectComposer, EffectPass, RenderPass, SMAAEffect, SMAAPreset } from 'postprocessing';
+import { BloomEffect, EffectComposer, EffectPass, RenderPass } from 'postprocessing';
 
 const DEFAULT_EFFECT_OPTIONS = {
   onSpeedUp: () => {},
   onSlowDown: () => {},
   distortion: 'turbulentDistortion',
-  length: 400,
+  length: 300,             // Dikurangi dari 400 agar beban render lebih ringan
   roadWidth: 10,
   islandWidth: 2,
   lanesPerRoad: 4,
   fov: 90,
   fovSpeedUp: 150,
-  speedUp: 2,
+  speedUp: 1.5,
   carLightsFade: 0.4,
-  totalSideLightSticks: 20,
-  lightPairsPerRoadWay: 40,
+  totalSideLightSticks: 12, // Dikurangi dari 20
+  lightPairsPerRoadWay: 20, // Dikurangi dari 40 (beban render berkurang 50%)
   shoulderLinesWidthPercentage: 0.05,
   brokenLinesWidthPercentage: 0.1,
   brokenLinesLengthPercentage: 0.5,
@@ -26,8 +26,8 @@ const DEFAULT_EFFECT_OPTIONS = {
   lightStickHeight: [1.3, 1.7],
   movingAwaySpeed: [60, 80],
   movingCloserSpeed: [-120, -160],
-  carLightsLength: [400 * 0.03, 400 * 0.2],
-  carLightsRadius: [0.05, 0.14],
+  carLightsLength: [12, 60],
+  carLightsRadius: [0.05, 0.12],
   carWidthPercentage: [0.3, 0.5],
   carShiftX: [-0.8, 0.8],
   carFloorSeparation: [0, 5],
@@ -49,6 +49,8 @@ export default function Hyperspeed({ effectOptions = DEFAULT_EFFECT_OPTIONS }: {
   useEffect(() => {
     const container = hyperspeedRef.current;
     if (!container) return;
+
+    let isVisible = true; // Flag untuk mengecek apakah elemen terlihat di layar
 
     const options = {
       ...DEFAULT_EFFECT_OPTIONS,
@@ -75,13 +77,10 @@ export default function Hyperspeed({ effectOptions = DEFAULT_EFFECT_OPTIONS }: {
 uniform vec3 uAmp;
 uniform vec3 uFreq;
 uniform float uTime;
-
 #ifndef PI
 #define PI 3.14159265358979
 #endif
-
 float distortionNsin(float val){ return sin(val) * 0.5 + 0.5; }
-
 vec3 getDistortion(float progress){
   float movementProgressFix = 0.02;
   return vec3( 
@@ -109,13 +108,10 @@ vec3 getDistortion(float progress){
 uniform vec4 uFreq;
 uniform vec4 uAmp;
 uniform float uTime;
-
 #ifndef PI
 #define PI 3.14159265358979
 #endif
-
 float distortionNsin(float val){ return sin(val) * 0.5 + 0.5; }
-
 float getDistortionX(float progress){
   return (cos(PI * progress * uFreq.r + uTime) * uAmp.r + pow(cos(PI * progress * uFreq.g + uTime * (uFreq.g / uFreq.r)), 2.0) * uAmp.g);
 }
@@ -143,9 +139,11 @@ vec3 getDistortion(float progress){
       constructor(container, options) {
         this.options = options;
         this.container = container;
-        this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance" });
         this.renderer.setSize(container.offsetWidth, container.offsetHeight, false);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        // OPTIMASI: Dibatasi maksimal 1.25x agar GPU laptop tidak bekerja keras
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
 
         this.composer = new EffectComposer(this.renderer);
         this.camera = new THREE.PerspectiveCamera(options.fov, container.offsetWidth / container.offsetHeight, 0.1, 10000);
@@ -185,11 +183,10 @@ vec3 getDistortion(float progress){
 
       initPasses() {
         const renderPass = new RenderPass(this.scene, this.camera);
-        const bloomPass = new EffectPass(this.camera, new BloomEffect({ luminanceThreshold: 0.2, luminanceSmoothing: 0, resolutionScale: 1 }));
-        const smaaPass = new EffectPass(this.camera, new SMAAEffect({ preset: SMAAPreset.MEDIUM, searchImage: SMAAEffect.searchImageDataURL, areaImage: SMAAEffect.areaImageDataURL }));
+        // OPTIMASI: Intensitas bloom diturunkan
+        const bloomPass = new EffectPass(this.camera, new BloomEffect({ luminanceThreshold: 0.3, luminanceSmoothing: 0.1, resolutionScale: 0.5 }));
         this.composer.addPass(renderPass);
         this.composer.addPass(bloomPass);
-        this.composer.addPass(smaaPass);
       }
 
       onResize() {
@@ -221,9 +218,14 @@ vec3 getDistortion(float progress){
 
       tick() {
         if (this.disposed) return;
-        const delta = this.clock.getDelta();
-        this.render(delta);
-        this.update(delta);
+        
+        // OPTIMASI: Hentikan perhitungan render jika user meng-scroll jauh dari 3D Hero Section
+        if (isVisible) {
+          const delta = this.clock.getDelta();
+          this.render(delta);
+          this.update(delta);
+        }
+        
         requestAnimationFrame(this.tick);
       }
 
@@ -249,7 +251,9 @@ vec3 getDistortion(float progress){
       init() {
         const options = this.options;
         const curve = new THREE.LineCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1));
-        const geometry = new THREE.TubeGeometry(curve, 40, 1, 8, false);
+        
+        // OPTIMASI: Segmen tube dikurangi dari (40, 8) menjadi (15, 4)
+        const geometry = new THREE.TubeGeometry(curve, 15, 1, 4, false);
         const instanced = new THREE.InstancedBufferGeometry().copy(geometry);
         instanced.instanceCount = options.lightPairsPerRoadWay * 2;
         const laneWidth = options.roadWidth / options.lanesPerRoad;
@@ -399,7 +403,8 @@ void main() {
       constructor(webgl, options) { this.webgl = webgl; this.options = options; this.uTime = { value: 0 }; }
       createPlane(side, isRoad) {
         const options = this.options;
-        const geometry = new THREE.PlaneGeometry(isRoad ? options.roadWidth : options.islandWidth, options.length, 20, 100);
+        // OPTIMASI: Segmen bidang jalan dikurangi dari (20, 100) menjadi (10, 40)
+        const geometry = new THREE.PlaneGeometry(isRoad ? options.roadWidth : options.islandWidth, options.length, 10, 40);
         let uniforms = { uTravelLength: { value: options.length }, uColor: { value: new THREE.Color(isRoad ? options.colors.roadColor : options.colors.islandColor) }, uTime: this.uTime };
 
         if (isRoad) {
@@ -467,9 +472,19 @@ void main() {
       update(time) { this.uTime.value = time; }
     }
 
+    // OPTIMASI: Observer untuk jeda render saat out-of-view
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(container);
+
     const app = new App(container, options);
 
     return () => {
+      observer.disconnect();
       app.dispose();
     };
   }, [effectOptions]);
@@ -477,7 +492,7 @@ void main() {
   return (
     <div 
       ref={hyperspeedRef} 
-      className="absolute inset-0 w-full h-full overflow-hidden [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:absolute [&>canvas]:inset-0" 
+      className="absolute inset-0 w-full h-full overflow-hidden [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:absolute [&>canvas]:inset-0 pointer-events-none" 
     />
   );
 }
