@@ -1,9 +1,10 @@
-import HeroSection from "./components/HeroSection";
+import Navbar from "./components/Navbar";
 
 export default function HomePage() {
-  return (
-    <main className="min-h-screen bg-slate-950">
-      <HeroSection />    
-    </main>
-  );
+    return (
+      <main className="min-h-screen bg-slate-950">
+        <Navbar />
+        <HeroSection />    
+      </main>
+    );
 }
