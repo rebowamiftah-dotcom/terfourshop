@@ -1,14 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
-// --- DUMMY DATA ---
+// --- DUMMY DATA CATEGORIES (DENGAN GAMBAR & KETERANGAN KATEGORI) ---
 const CATEGORIES = [
-  { id: 1, name: "Digital Assets", count: "1.2k+ Items", icon: "⚡", gradient: "from-purple-600 to-indigo-600" },
-  { id: 2, name: "Cyber Fashion", count: "850+ Items", icon: "💎", gradient: "from-pink-500 to-rose-600" },
-  { id: 3, name: "3D Hardware", count: "420+ Items", icon: "⚙️", gradient: "from-cyan-500 to-blue-600" },
-  { id: 4, name: "Exclusive NFT", count: "310+ Items", icon: "🔮", gradient: "from-amber-400 to-orange-500" },
+  {
+    id: 1,
+    name: "Kategori 1",
+    description: "Keterangan kategori terfavorit 1 yang dapat disesuaikan",
+    image: "/jason.jpg", // Ganti dengan path gambar kamu sendiri
+    gradient: "from-purple-600 to-indigo-600",
+  },
+  {
+    id: 2,
+    name: "Kategori 2",
+    description: "Keterangan kategori terfavorit 2 yang dapat disesuaikan",
+    image: "/jason.jpg", // Ganti dengan path gambar kamu sendiri
+    gradient: "from-pink-500 to-rose-600",
+  },
+  {
+    id: 3,
+    name: "Kategori 3",
+    description: "Keterangan kategori terfavorit 3 yang dapat disesuaikan",
+    image: "/jason.jpg", // Ganti dengan path gambar kamu sendiri
+    gradient: "from-cyan-500 to-blue-600",
+  },
+  {
+    id: 4,
+    name: "Kategori 4",
+    description: "Keterangan kategori terfavorit 4 yang dapat disesuaikan",
+    image: "/jason.jpg", // Ganti dengan path gambar kamu sendiri
+    gradient: "from-amber-400 to-orange-500",
+  },
 ];
 
 const PRODUCTS = [
@@ -77,6 +102,28 @@ export default function HomeSections() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [cartCount, setCartCount] = useState<number[]>([]);
 
+  // 1. STATE DUMMY TIMER (Jam, Menit, Detik)
+  const [timeLeft, setTimeLeft] = useState({
+    hours: 8,
+    minutes: 42,
+    seconds: 19,
+  });
+
+  // 2. LOGIKA TIMER MUNDUR TERUS-MENERUS & REPEAT DETIK KE 19
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev.seconds > 0) {
+          return { ...prev, seconds: prev.seconds - 1 };
+        } else {
+          return { ...prev, seconds: 19 };
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   const toggleCart = (id: number) => {
     setCartCount((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -96,7 +143,7 @@ export default function HomeSections() {
 
   return (
     <div className="w-full bg-slate-950 text-white overflow-hidden">
-      {/* 1. INFINITE RUNNING MARQUEE (Bilah Pengumuman Berjalan) */}
+      {/* 1. INFINITE RUNNING MARQUEE */}
       <section className="py-3.5 bg-gradient-to-r from-purple-900/40 via-pink-900/40 to-slate-900/40 border-y border-white/10 overflow-hidden relative">
         <motion.div
           className="flex whitespace-nowrap w-max"
@@ -114,7 +161,7 @@ export default function HomeSections() {
         </motion.div>
       </section>
 
-      {/* 2. FEATURED CATEGORIES (Kategori Pilihan) */}
+      {/* 2. FEATURED CATEGORIES (Kategori Terfavorit dengan Gambar & Deskripsi) */}
       <section className="py-20 container mx-auto px-6 relative">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
           <div>
@@ -126,7 +173,7 @@ export default function HomeSections() {
             </h2>
           </div>
           <p className="text-slate-400 text-sm max-w-md mt-2 md:mt-0 font-light">
-            Temukan berbagai koleksi produk masa depan yang telah dikategorikan untuk kemudahan navigasi Anda.
+            Temukan berbagai koleksi produk pilihan yang telah dikategorikan untuk kemudahan Anda.
           </p>
         </div>
 
@@ -142,7 +189,7 @@ export default function HomeSections() {
               whileTap={{ y: -2, scale: 0.98 }}
               className="group relative rounded-2xl p-[1.5px] bg-white/10 transition-all duration-200 cursor-pointer overflow-hidden"
             >
-              {/* RUNNING RAINBOW BORDER (BERJALAN HANYA DI PINGGIRAN) */}
+              {/* RUNNING RAINBOW BORDER */}
               <motion.div
                 className="absolute -inset-[1.5px] rounded-[17px] opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 -z-10"
                 style={{
@@ -160,20 +207,35 @@ export default function HomeSections() {
               />
 
               {/* INNER SOLID CARD CONTAINER */}
-              <div className="w-full h-full p-6 rounded-[15px] bg-slate-950 relative overflow-hidden">
+              <div className="w-full h-full p-5 rounded-[15px] bg-slate-950 flex flex-col justify-between relative overflow-hidden">
                 <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${cat.gradient} opacity-10 rounded-full blur-2xl group-hover:opacity-30 transition-opacity duration-200`} />
-                <div className="text-4xl mb-4">{cat.icon}</div>
-                <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors">
-                  {cat.name}
-                </h3>
-                <p className="text-xs text-slate-400 mt-1">{cat.count}</p>
+
+                {/* Kontainer Gambar Kategori */}
+                <div className="relative w-full h-44 rounded-xl overflow-hidden mb-4 bg-slate-900 border border-white/5">
+                  <Image
+                    src={cat.image}
+                    alt={cat.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+
+                {/* Judul & Keterangan Kategori */}
+                <div className="relative z-10">
+                  <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors">
+                    {cat.name}
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1.5 font-light leading-relaxed">
+                    {cat.description}
+                  </p>
+                </div>
               </div>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* 3. FEATURED PRODUCTS (Katalog Produk Terlaris) */}
+      {/* 3. FEATURED PRODUCTS */}
       <section className="py-20 bg-slate-900/30 border-t border-white/5 relative">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -199,7 +261,6 @@ export default function HomeSections() {
                   whileTap={{ y: -2, scale: 0.98 }}
                   className="group relative rounded-2xl p-[1.5px] bg-white/10 transition-all duration-200 cursor-pointer overflow-hidden"
                 >
-                  {/* RUNNING RAINBOW BORDER (BERJALAN HANYA DI PINGGIRAN) */}
                   <motion.div
                     className="absolute -inset-[1.5px] rounded-[17px] opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 -z-10"
                     style={{
@@ -216,9 +277,7 @@ export default function HomeSections() {
                     }}
                   />
 
-                  {/* INNER SOLID CARD CONTAINER */}
                   <div className="w-full h-full p-5 rounded-[15px] bg-slate-950 flex flex-col justify-between">
-                    {/* Tag Header Card */}
                     <div className="flex justify-between items-center mb-4 z-10">
                       <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30">
                         {item.tag}
@@ -228,12 +287,10 @@ export default function HomeSections() {
                       </span>
                     </div>
 
-                    {/* Thumbnail / Visual Produk */}
                     <div className="w-full h-44 rounded-xl bg-slate-900/80 flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-200 my-2">
                       {item.image}
                     </div>
 
-                    {/* Info Produk */}
                     <div className="mt-4">
                       <p className="text-[11px] text-slate-400 uppercase tracking-wider">{item.category}</p>
                       <h3 className="text-base font-bold text-white mt-1 group-hover:text-pink-300 transition-colors line-clamp-1">
@@ -265,7 +322,7 @@ export default function HomeSections() {
         </div>
       </section>
 
-      {/* 4. VALUE PROPOSITION (Keunggulan Toko) */}
+      {/* 4. VALUE PROPOSITION */}
       <section className="py-20 container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {FEATURES.map((feat, index) => (
@@ -279,7 +336,6 @@ export default function HomeSections() {
               whileTap={{ y: -2, scale: 0.98 }}
               className="group relative rounded-2xl p-[1.5px] bg-white/10 transition-all duration-200 cursor-pointer overflow-hidden"
             >
-              {/* RUNNING RAINBOW BORDER (BERJALAN HANYA DI PINGGIRAN) */}
               <motion.div
                 className="absolute -inset-[1.5px] rounded-[17px] opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 -z-10"
                 style={{
@@ -296,7 +352,6 @@ export default function HomeSections() {
                 }}
               />
 
-              {/* INNER SOLID CARD CONTAINER */}
               <div className="w-full h-full p-6 rounded-[15px] bg-slate-950">
                 <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-105 transition-transform duration-200">
                   {feat.icon}
@@ -309,7 +364,7 @@ export default function HomeSections() {
         </div>
       </section>
 
-      {/* 5. FLASH SALE BANNER (Penawaran Terbatas) */}
+      {/* 5. FLASH SALE BANNER */}
       <section className="py-16 container mx-auto px-6 mb-16">
         <div className="relative rounded-3xl p-8 sm:p-12 overflow-hidden bg-gradient-to-r from-purple-900/60 via-slate-900 to-indigo-900/60 border border-purple-500/30 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="relative z-10 max-w-xl text-center md:text-left">
@@ -327,15 +382,21 @@ export default function HomeSections() {
           <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 shrink-0">
             <div className="flex gap-2 text-center">
               <div className="bg-slate-950/80 px-4 py-2.5 rounded-xl border border-white/10">
-                <span className="text-xl font-bold text-purple-400">08</span>
+                <span className="text-xl font-bold text-purple-400">
+                  {String(timeLeft.hours).padStart(2, "0")}
+                </span>
                 <p className="text-[10px] text-slate-400 uppercase">Jam</p>
               </div>
               <div className="bg-slate-950/80 px-4 py-2.5 rounded-xl border border-white/10">
-                <span className="text-xl font-bold text-pink-400">42</span>
+                <span className="text-xl font-bold text-pink-400">
+                  {String(timeLeft.minutes).padStart(2, "0")}
+                </span>
                 <p className="text-[10px] text-slate-400 uppercase">Menit</p>
               </div>
               <div className="bg-slate-950/80 px-4 py-2.5 rounded-xl border border-white/10">
-                <span className="text-xl font-bold text-cyan-400">19</span>
+                <span className="text-xl font-bold text-cyan-400">
+                  {String(timeLeft.seconds).padStart(2, "0")}
+                </span>
                 <p className="text-[10px] text-slate-400 uppercase">Detik</p>
               </div>
             </div>
