@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, Variants } from 'framer-motion';
-import Navbar from '../components/Navbar';
 
 // Variabel Animasi Scroll dengan Tipe Data Explicit 'Variants'
 const fadeInUp: Variants = {
@@ -26,9 +25,6 @@ const staggerContainer: Variants = {
 export default function About() {
   return (
     <div className="bg-black text-white min-h-screen selection:bg-white selection:text-black">
-      {/* 1. NAVBAR DIPALING ATAS */}
-      <Navbar />
-
       <main className="space-y-20 pb-20">
         {/* 2. HERO SECTION GELAP DENGAN ANIMASI */}
         <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">

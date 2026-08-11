@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { motion, useSpring, useTransform, Variants } from "framer-motion";
 
 // Memuat komponen Hyperspeed khusus di sisi browser
-const Hyperspeed = dynamic(() => import("./Hyperspeed"), { ssr: false });
+const Hyperspeed = dynamic(() => import("./HyperSpeed"), { ssr: false });
 
 // Komponen Counter khusus yang pasti dimulai dari angka 0
 function Counter({ value, decimals = 0, suffix = "" }: { value: number; decimals?: number; suffix?: string }) {
