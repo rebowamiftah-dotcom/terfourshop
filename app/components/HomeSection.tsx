@@ -3,75 +3,81 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
-// --- DUMMY DATA CATEGORIES (DENGAN GAMBAR & KETERANGAN KATEGORI) ---
+// --- DUMMY DATA CATEGORIES ---
 const CATEGORIES = [
   {
     id: 1,
     name: "Kategori 1",
     description: "Keterangan kategori terfavorit 1 yang dapat disesuaikan",
-    image: "/jason.jpg", // Ganti dengan path gambar kamu sendiri
+    image: "/jason.jpg",
     gradient: "from-purple-600 to-indigo-600",
   },
   {
     id: 2,
     name: "Kategori 2",
     description: "Keterangan kategori terfavorit 2 yang dapat disesuaikan",
-    image: "/jason.jpg", // Ganti dengan path gambar kamu sendiri
+    image: "/jason.jpg",
     gradient: "from-pink-500 to-rose-600",
   },
   {
     id: 3,
     name: "Kategori 3",
     description: "Keterangan kategori terfavorit 3 yang dapat disesuaikan",
-    image: "/jason.jpg", // Ganti dengan path gambar kamu sendiri
+    image: "/jason.jpg",
     gradient: "from-cyan-500 to-blue-600",
   },
   {
     id: 4,
     name: "Kategori 4",
     description: "Keterangan kategori terfavorit 4 yang dapat disesuaikan",
-    image: "/jason.jpg", // Ganti dengan path gambar kamu sendiri
+    image: "/jason.jpg",
     gradient: "from-amber-400 to-orange-500",
   },
 ];
 
+// --- DUMMY DATA PRODUCTS ---
 const PRODUCTS = [
   {
     id: 1,
-    name: "Terfour Neural Headset V2",
-    category: "3D Hardware",
-    price: "$299.00",
+    name: "T-shirt Patrick Jane",
+    category: "Pakaian",
+    price: "Rp.300.000",
     rating: "4.9",
     tag: "Best Seller",
     image: "🎧",
+    isLimitedEdition: false,
   },
   {
     id: 2,
-    name: "Hologram Jacket Cyber-X",
-    category: "Cyber Fashion",
-    price: "$149.00",
+    name: "Gelang Loopy",
+    category: "Aksesoris",
+    price: "Rp.1.500.000",
     rating: "4.8",
     tag: "Hot item",
     image: "🧥",
+    isLimitedEdition: false,
   },
   {
     id: 3,
-    name: "Lotus Metaverse Pass",
-    category: "Digital Assets",
-    price: "$89.00",
+    name: "Nike Spongebob Squarepants",
+    category: "Sepatu",
+    price: "Rp.4.000.000",
     rating: "5.0",
-    tag: "Exclusive",
+    tag: "Limited Edition",
     image: "🪷",
+    isLimitedEdition: true, // CARD TIMBUL & PROMINENT
   },
   {
     id: 4,
-    name: "Quantum Soundbar 3D",
-    category: "3D Hardware",
-    price: "$199.00",
+    name: "Monitor SAMSUNG",
+    category: "Elektronik",
+    price: "Rp.3.500.000",
     rating: "4.7",
     tag: "New",
     image: "🔊",
+    isLimitedEdition: false,
   },
 ];
 
@@ -91,25 +97,28 @@ const FEATURES = [
     desc: "Mendukung berbagai metode pembayaran modern secara aman dan praktis.",
     icon: "💳",
   },
-  {
-    title: "Dukungan AI 24/7",
-    desc: "Layanan bantuan responsif yang siap melayani pertanyaan Anda kapan saja.",
-    icon: "🤖",
-  },
 ];
 
-export default function HomeSections() {
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [cartCount, setCartCount] = useState<number[]>([]);
+// FUNGSI CEK APABILA HARGA >= 1 JUTA
+const checkIsPriceOneMillionOrMore = (priceString: string) => {
+  const numericValue = parseInt(priceString.replace(/\D/g, ""), 10);
+  return numericValue >= 1000000;
+};
 
-  // 1. STATE DUMMY TIMER (Jam, Menit, Detik)
+export default function HomeSections() {
+  const router = useRouter();
+
+  // --- STATE STATUS PENDAFTARAN / LOGIN ---
+  const [isRegistered, setIsRegistered] = useState(false);
+
+  // 1. STATE DUMMY TIMER
   const [timeLeft, setTimeLeft] = useState({
     hours: 8,
     minutes: 42,
     seconds: 19,
   });
 
-  // 2. LOGIKA TIMER MUNDUR TERUS-MENERUS & REPEAT DETIK KE 19
+  // 2. LOGIKA TIMER MUNDUR
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -124,10 +133,13 @@ export default function HomeSections() {
     return () => clearInterval(timer);
   }, []);
 
-  const toggleCart = (id: number) => {
-    setCartCount((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+  // --- LOGIKA TOMBOL PERGI KE TOKO ---
+  const handleGoToStore = () => {
+    if (!isRegistered) {
+      router.push("/register");
+    } else {
+      router.push("/shopping");
+    }
   };
 
   const marqueeText = (
@@ -161,7 +173,7 @@ export default function HomeSections() {
         </motion.div>
       </section>
 
-      {/* 2. FEATURED CATEGORIES (Kategori Terfavorit dengan Gambar & Deskripsi) */}
+      {/* 2. FEATURED CATEGORIES */}
       <section className="py-20 container mx-auto px-6 relative">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
           <div>
@@ -189,7 +201,6 @@ export default function HomeSections() {
               whileTap={{ y: -2, scale: 0.98 }}
               className="group relative rounded-2xl p-[1.5px] bg-white/10 transition-all duration-200 cursor-pointer overflow-hidden"
             >
-              {/* RUNNING RAINBOW BORDER */}
               <motion.div
                 className="absolute -inset-[1.5px] rounded-[17px] opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 -z-10"
                 style={{
@@ -206,11 +217,9 @@ export default function HomeSections() {
                 }}
               />
 
-              {/* INNER SOLID CARD CONTAINER */}
               <div className="w-full h-full p-5 rounded-[15px] bg-slate-950 flex flex-col justify-between relative overflow-hidden">
                 <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${cat.gradient} opacity-10 rounded-full blur-2xl group-hover:opacity-30 transition-opacity duration-200`} />
 
-                {/* Kontainer Gambar Kategori */}
                 <div className="relative w-full h-44 rounded-xl overflow-hidden mb-4 bg-slate-900 border border-white/5">
                   <Image
                     src={cat.image}
@@ -220,7 +229,6 @@ export default function HomeSections() {
                   />
                 </div>
 
-                {/* Judul & Keterangan Kategori */}
                 <div className="relative z-10">
                   <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors">
                     {cat.name}
@@ -235,10 +243,10 @@ export default function HomeSections() {
         </div>
       </section>
 
-      {/* 3. FEATURED PRODUCTS */}
-      <section className="py-20 bg-slate-900/30 border-t border-white/5 relative">
+      {/* 3. FEATURED PRODUCTS (PRODUK POPULER) */}
+      <section className="py-24 bg-slate-900/30 border-t border-white/5 relative">
         <div className="container mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-12">
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest text-pink-400">
               Koleksi Terbaik
             </span>
@@ -247,39 +255,67 @@ export default function HomeSections() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
             {PRODUCTS.map((item, index) => {
-              const isAdded = cartCount.includes(item.id);
+              const isLimited = item.isLimitedEdition;
+              const isExpensive = checkIsPriceOneMillionOrMore(item.price);
+
               return (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, scale: isLimited ? 1.05 : 0.95 }}
+                  whileInView={{ opacity: 1, scale: isLimited ? 1.05 : 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
-                  whileHover={{ y: -5 }}
+                  whileHover={{ y: isLimited ? -10 : -5, scale: isLimited ? 1.08 : 1.02 }}
                   whileTap={{ y: -2, scale: 0.98 }}
-                  className="group relative rounded-2xl p-[1.5px] bg-white/10 transition-all duration-200 cursor-pointer overflow-hidden"
+                  className={`group relative rounded-2xl p-[1.5px] cursor-pointer transition-all duration-300 ${
+                    isLimited
+                      ? "bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 -translate-y-3 lg:-translate-y-4 shadow-[0_15px_35px_rgba(236,72,153,0.3)] z-20"
+                      : "bg-white/10"
+                  }`}
                 >
+                  {/* RUNNING RAINBOW BORDER */}
                   <motion.div
-                    className="absolute -inset-[1.5px] rounded-[17px] opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 -z-10"
+                    className={`absolute -inset-[1.5px] rounded-[17px] transition-opacity duration-200 -z-10 ${
+                      isLimited ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-active:opacity-100"
+                    }`}
                     style={{
-                      backgroundImage: "linear-gradient(90deg, #ec4899, #f43f5e, #eab308, #22c55e, #06b6d4, #a855f7, #ec4899)",
+                      backgroundImage: isLimited
+                        ? "linear-gradient(90deg, #f59e0b, #ec4899, #8b5cf6, #06b6d4, #f59e0b)"
+                        : "linear-gradient(90deg, #ec4899, #f43f5e, #eab308, #22c55e, #06b6d4, #a855f7, #ec4899)",
                       backgroundSize: "200% 100%",
                     }}
                     animate={{
                       backgroundPosition: ["0% 0%", "200% 0%"],
                     }}
                     transition={{
-                      duration: 2.5,
+                      duration: isLimited ? 1.8 : 2.5,
                       repeat: Infinity,
                       ease: "linear",
                     }}
                   />
 
-                  <div className="w-full h-full p-5 rounded-[15px] bg-slate-950 flex flex-col justify-between">
+                  {/* GLOW ATMOSPHERE BAGIAN BELAKANG CARD LIMITED */}
+                  {isLimited && (
+                    <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/30 to-pink-500/30 rounded-2xl blur-xl -z-20 animate-pulse" />
+                  )}
+
+                  <div className={`w-full h-full p-5 rounded-[15px] flex flex-col justify-between relative overflow-hidden ${
+                    isLimited ? "bg-slate-950/95 border border-amber-500/20" : "bg-slate-950"
+                  }`}>
+                    
+                    {/* ACCENT GLOW DALAM CARD LIMITED */}
+                    {isLimited && (
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/20 to-pink-500/20 blur-2xl pointer-events-none" />
+                    )}
+
                     <div className="flex justify-between items-center mb-4 z-10">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider ${
+                        isLimited
+                          ? "bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-md shadow-amber-500/20 border border-amber-300/40 animate-bounce"
+                          : "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                      }`}>
                         {item.tag}
                       </span>
                       <span className="text-xs text-amber-400 font-semibold flex items-center gap-1">
@@ -287,30 +323,47 @@ export default function HomeSections() {
                       </span>
                     </div>
 
-                    <div className="w-full h-44 rounded-xl bg-slate-900/80 flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-200 my-2">
+                    <div className={`w-full h-44 rounded-xl flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-200 my-2 relative ${
+                      isLimited ? "bg-gradient-to-b from-amber-500/10 to-pink-500/10 border border-amber-500/20" : "bg-slate-900/80"
+                    }`}>
                       {item.image}
                     </div>
 
                     <div className="mt-4">
-                      <p className="text-[11px] text-slate-400 uppercase tracking-wider">{item.category}</p>
-                      <h3 className="text-base font-bold text-white mt-1 group-hover:text-pink-300 transition-colors line-clamp-1">
+                      <p className={`text-[11px] uppercase tracking-wider ${isLimited ? "text-amber-400 font-semibold" : "text-slate-400"}`}>
+                        {item.category}
+                      </p>
+                      <h3 className={`text-base font-bold mt-1 line-clamp-1 transition-colors ${
+                        isLimited ? "text-amber-200 group-hover:text-pink-300" : "text-white group-hover:text-pink-300"
+                      }`}>
                         {item.name}
                       </h3>
 
-                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5">
-                        <span className="text-lg font-black text-white">{item.price}</span>
+                      {/* KONTAINER HARGA DAN TOMBOL (DIATUR GAP AGAR TIDAK MEPET) */}
+                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5 gap-2">
+                        <span className={`font-black shrink-0 ${
+                          isExpensive ? "text-sm sm:text-base" : "text-base sm:text-lg"
+                        } ${isLimited ? "text-amber-300" : "text-white"}`}>
+                          {item.price}
+                        </span>
+                        
+                        {/* TOMBOL PERGI KE TOKO (UKURAN DIPERKECEIL APABILA HARGA >= 1 JUTA) */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            toggleCart(item.id);
+                            handleGoToStore();
                           }}
-                          className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
-                            isAdded
-                              ? "bg-emerald-600 text-white"
+                          className={`rounded-lg font-semibold transition-all duration-200 flex items-center gap-1 shrink-0 active:scale-95 ${
+                            isExpensive
+                              ? "px-2.5 py-1.5 text-[10px]" 
+                              : "px-3.5 py-2 text-xs"
+                          } ${
+                            isLimited
+                              ? "bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-400 hover:to-pink-500 text-white shadow-md shadow-pink-500/20"
                               : "bg-white/10 hover:bg-purple-600 text-white"
                           }`}
                         >
-                          {isAdded ? "✓ Tersimpan" : "+ Keranjang"}
+                          Pergi ke Toko
                         </button>
                       </div>
                     </div>
@@ -324,7 +377,7 @@ export default function HomeSections() {
 
       {/* 4. VALUE PROPOSITION */}
       <section className="py-20 container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {FEATURES.map((feat, index) => (
             <motion.div
               key={index}
@@ -401,7 +454,10 @@ export default function HomeSections() {
               </div>
             </div>
 
-            <button className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-bold text-sm shadow-lg shadow-pink-500/25 transition-all duration-200 hover:scale-105 active:scale-95">
+            <button 
+              onClick={handleGoToStore}
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-bold text-sm shadow-lg shadow-pink-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
+            >
               Klaim Promo Now
             </button>
           </div>
