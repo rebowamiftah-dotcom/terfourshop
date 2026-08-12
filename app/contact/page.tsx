@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Footer from "../components/Footer";
 
 
 // --- DUMMY DATA INFORMASI KONTAK ---
@@ -270,9 +271,10 @@ export default function Contact() {
               )}
             </div>
           </motion.div>
-
+          <Footer />
         </div>
       </div>
+
     </div>
   );
 }
