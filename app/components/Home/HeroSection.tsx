@@ -55,7 +55,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-slate-950 text-white">
+    <section className="relative h-[85dvh] w-full flex items-center justify-center overflow-hidden bg-slate-950 text-white">
       {/* 3D BACKGROUND CONTAINER (z-0 agar tidak tertutup bg-slate-950) */}
       <Background />
 
@@ -108,7 +108,7 @@ export default function HeroSection() {
         </motion.div>
 
         {/* Metric / Live Stats dengan Animasi Angka Murni dari 0 */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 sm:grid-cols-3 gap-6 mt-12 pt-8 border-t border-white/10 w-full max-w-2xl text-slate-300">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 sm:grid-cols-3 gap-6 mt-12 pt-8 w-full max-w-2xl text-slate-300">
           <div>
             <p className="text-xl sm:text-2xl font-bold text-white">
               <Counter value={10} suffix="K+" />
