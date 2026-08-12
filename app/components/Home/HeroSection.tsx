@@ -4,7 +4,7 @@ import { motion, useSpring, useTransform, Variants } from "framer-motion";
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
-import Background from "./Background/Background";
+import Background from "../Background/Background";
 
 // Komponen Counter khusus yang pasti dimulai dari angka 0
 function Counter({ value, decimals = 0, suffix = "" }: { value: number; decimals?: number; suffix?: string }) {
