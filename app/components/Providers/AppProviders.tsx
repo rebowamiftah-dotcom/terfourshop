@@ -1,5 +1,6 @@
 'use client';
 
+import { CartProvider } from '../Contexts/CartContext';
 import { LanguageProvider } from '../Contexts/LanguageContext';
 import { SessionProvider } from "next-auth/react";
 import type { ReactNode } from 'react';
@@ -12,8 +13,11 @@ export default function AppProviders({
   return (
     <LanguageProvider>
       <SessionProvider>
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </SessionProvider>
     </LanguageProvider>
   );
 }
+  

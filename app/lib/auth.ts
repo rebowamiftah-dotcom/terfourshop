@@ -1,10 +1,14 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialProvider from "next-auth/providers/credentials"
 import type { AuthOptions } from "next-auth";
 import type { Adapter, AdapterUser } from "next-auth/adapters";
+
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
+
 import { v7 as uuidv7 } from "uuid";
+import bcrypt from "bcryptjs";
 
 function generateUsername(email: string): string {
   const base = email
@@ -88,12 +92,49 @@ export const authOptions: AuthOptions = {
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID!,
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-
-      // Atur agar selalu pilih akun terlebih dahulu
       authorization: {
         params: {
+          // Atur agar selalu pilih akun terlebih dahulu
           prompt: "select_account",
         },
+      },
+    }),
+
+    CredentialProvider({
+      name: "Credentials",
+      credentials: {
+        login: { label: "Username atau Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.login || !credentials?.password) {
+          return null;
+        }
+
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { username: credentials.login },
+              { email: credentials.login },
+            ],
+          },
+        });
+
+        if (!user || !user.password) {
+          return null;
+        }
+
+        const isValid = await bcrypt.compare(credentials.password, user.password);
+
+        if (!isValid) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          name: user.username,
+          email: user.email,
+        };
       },
     }),
   ],

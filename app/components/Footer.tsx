@@ -74,31 +74,31 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* 3. BANTUAN & LAYANAN */}
+          {/* 3. BANTUAN & LAYANAN (TERHUBUNG RUTE /bantuan/...) */}
           <div>
             <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 border-l-2 border-pink-400 pl-2.5">
               Bantuan
             </h4>
             <ul className="space-y-2.5 text-xs">
               <li>
-                <a href="#" className="hover:text-pink-300 transition-colors">
+                <a href="#" className="hover:text-pink-300 transition-colors opacity-60 cursor-not-allowed" title="Fitur Segera Hadir">
                   Lacak Pesanan
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-pink-300 transition-colors">
+                <Link href="/bantuan/panduan-ukuran" className="hover:text-pink-300 transition-colors">
                   Panduan Ukuran
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-pink-300 transition-colors">
+                <Link href="/bantuan/kebijakan-privasi" className="hover:text-pink-300 transition-colors">
                   Kebijakan Privasi
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-pink-300 transition-colors">
+                <Link href="/bantuan/syarat-ketentuan" className="hover:text-pink-300 transition-colors">
                   Syarat & Ketentuan
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
