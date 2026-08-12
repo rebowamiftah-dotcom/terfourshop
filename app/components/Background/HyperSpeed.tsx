@@ -938,6 +938,7 @@ class App {
   speedUp: number;
   timeOffset: number;
   hasValidSize: boolean;
+  isPaused: boolean;
 
   constructor(container: HTMLElement, options: HyperspeedOptions) {
     this.options = options;
@@ -958,7 +959,7 @@ class App {
       alpha: true
     });
     this.renderer.setSize(initW, initH, false);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
 
     const gl = this.renderer.getContext() as WebGLRenderingContext | WebGL2RenderingContext | null;
     if (gl && typeof gl.getContextAttributes === 'function') {
@@ -992,6 +993,7 @@ class App {
     this.clock = new THREE.Clock();
     this.assets = {};
     this.disposed = false;
+    this.isPaused = false;
 
     this.road = new Road(this, options);
     this.leftCarLights = new CarLights(
@@ -1049,6 +1051,16 @@ class App {
     this.hasValidSize = true;
   }
 
+  pause() {
+    this.isPaused = true;
+  }
+
+  resume() {
+    if (!this.isPaused) return;
+    this.isPaused = false;
+    this.clock.getDelta();
+  }
+
   initPasses() {
     this.renderPass = new RenderPass(this.scene, this.camera);
     this.bloomPass = new EffectPass(
@@ -1056,14 +1068,14 @@ class App {
       new BloomEffect({
         luminanceThreshold: 0.2,
         luminanceSmoothing: 0,
-        resolutionScale: 1
+        resolutionScale: 0.6
       })
     );
 
     const smaaPass = new EffectPass(
       this.camera,
       new SMAAEffect({
-        preset: SMAAPreset.MEDIUM
+        preset: SMAAPreset.LOW
       })
     );
     this.renderPass.renderToScreen = false;
@@ -1269,10 +1281,12 @@ class App {
       }
     }
 
-    if (this.hasValidSize) {
+    if (this.hasValidSize && !this.isPaused) {
       const delta = this.clock.getDelta();
       this.render(delta);
       this.update(delta);
+    } else if (this.isPaused) {
+      this.clock.getDelta();
     }
 
     requestAnimationFrame(this.tick);
@@ -1313,7 +1327,34 @@ const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = DEFAULT_EFFECT_OPTION
     appRef.current = myApp;
     myApp.loadAssets().then(myApp.init);
 
+    const observer = new IntersectionObserver(
+      entries => {
+        const entry = entries[0];
+        if (!entry) return;
+        if (entry.isIntersecting) {
+          myApp.resume();
+        } else {
+          myApp.pause();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(container);
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        myApp.pause();
+      } else {
+        myApp.resume();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (appRef.current) {
         appRef.current.dispose();
       }

@@ -57,7 +57,6 @@ export default function HeroSection() {
   return (
     <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-slate-950 text-white">
       {/* 3D BACKGROUND CONTAINER (z-0 agar tidak tertutup bg-slate-950) */}
-
       <Background />
 
       {/* Grid Pattern Overlay */}

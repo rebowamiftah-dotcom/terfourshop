@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { hyperspeedPresets } from './HyperSpeedPresets';
+import { motion } from 'framer-motion';
 
 const Hyperspeed = dynamic(
   () => import('./HyperSpeed'),
@@ -10,13 +11,11 @@ const Hyperspeed = dynamic(
 );
 
 export default function Background() {
-  const [isVisible, setIsVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       setMounted(true);
-      setIsVisible(true);
     });
     return () => {
       window.cancelAnimationFrame(frame);
@@ -24,12 +23,14 @@ export default function Background() {
   }, []);
 
   return (
-    <div
-      className={`w-full h-full transition-all duration-700 ease-out transform ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-      }`}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: mounted ? 1 : 0 }}
+      transition={{ duration: 1.2, ease: 'easeOut' }}
+      className="absolute inset-0 z-0 h-full w-full"
     >
-      {mounted ? <Hyperspeed effectOptions={hyperspeedPresets.one} /> : null}
-    </div>
+      {mounted && <Hyperspeed effectOptions={hyperspeedPresets.one} />}
+      <div className="absolute inset-0 bg-slate-950/30 pointer-events-none" />
+    </motion.div>
   );
 }
