@@ -57,15 +57,7 @@ export default function HeroSection() {
   return (
     <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-slate-950 text-white">
       {/* 3D BACKGROUND CONTAINER (z-0 agar tidak tertutup bg-slate-950) */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.2 }}
-        className="absolute inset-0 z-0 h-full w-full"
-      >
-        <Background />
-        <div className="absolute inset-0 bg-slate-950/30 pointer-events-none" />
-      </motion.div>
+      <Background />
 
       {/* Grid Pattern Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none z-0" />
