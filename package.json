@@ -9,19 +9,19 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.3",
     "@base-ui/react": "^1.7.0",
     "@prisma/adapter-mariadb": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
     "framer-motion": "^13.0.0",
     "lucide-react": "^1.31.0",
-<<<<<<< HEAD
     "motion": "^12.43.0",
-=======
->>>>>>> 73bf9776a2d9cbdf42d36903fb58060593282318
     "next": "16.3.0",
+    "next-auth": "^4.24.15",
     "postprocessing": "^6.39.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
