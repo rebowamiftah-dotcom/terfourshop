@@ -19,6 +19,7 @@ const uuid = () => uuidv7();
 async function main() {
     // HAPUS SEMUA DATA TABLE DAHULU
 
+    // Increase interactive transaction timeout to avoid commit timeouts on slow environments
     await prisma.$transaction([
         // =====================
         // TRANSACTION / ORDER
@@ -68,7 +69,7 @@ async function main() {
         prisma.paymentMethod.deleteMany(),
         prisma.businessType.deleteMany(),
         prisma.role.deleteMany(),
-    ]);
+    ], { maxWait: 20000 });
 
     console.log("Data lama berhasil dihapus.");
 
