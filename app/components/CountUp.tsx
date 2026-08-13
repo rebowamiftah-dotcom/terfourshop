@@ -39,7 +39,8 @@ export default function CountUp({
     stiffness,
     restDelta: 0.0001, // Memperhalus deteksi batas angka desimal kecil
     restSpeed: 0.0001
-});
+  });
+
   const isInView = useInView(ref, { once: true, margin: '0px' });
 
   const getDecimalPlaces = (num: number): number => {
