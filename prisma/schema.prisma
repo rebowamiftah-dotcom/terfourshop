@@ -366,25 +366,38 @@ model Store {
 }
 
 model Account {
-  id                String @id @db.Char(36)
-  userId            String @db.Char(36)
-  type              String @db.VarChar(50)
-  provider          String @db.VarChar(50)
-  providerAccountId String @db.VarChar(255)
+  id                 String  @id @db.Char(36)
+  user_id            String  @db.Char(36)
+  type               String  @db.VarChar(50)
+  provider           String  @db.VarChar(50)
+  providerAccountId  String  @db.VarChar(255)
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String? @db.VarChar(50)
+  scope              String? @db.VarChar(255)
+  id_token           String? @db.Text
+  session_state      String? @db.VarChar(255)
 
-  refresh_token String? @db.Text
-  access_token  String? @db.Text
-  expires_at    Int?
-  token_type    String? @db.VarChar(50)
-  scope         String? @db.VarChar(255)
-  id_token      String? @db.Text
-  session_state String? @db.VarChar(255)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@index([userId])
+  @@index([user_id])
   @@map("accounts")
+}
+
+model Member {
+  id         String   @id @db.Char(36)
+  user_id    String   @unique @db.Char(36)
+  full_name  String   @db.VarChar(100)
+  email      String   @unique @db.VarChar(255)
+  phone      String   @db.VarChar(20)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("members")
 }
 
 model User {
@@ -396,6 +409,7 @@ model User {
   role_id    String    @db.Char(36)
   created_at DateTime  @default(now()) @db.Timestamp(0)
   updated_at DateTime  @default(now()) @db.Timestamp(0)
+  members    Member?
   accounts   Account[]
   addresses  Address[]
   carts      Cart?
