@@ -2,6 +2,7 @@
 
 import { CartProvider } from '../Contexts/CartContext';
 import { LanguageProvider } from '../Contexts/LanguageContext';
+import { SessionProvider } from "next-auth/react";
 import type { ReactNode } from 'react';
 
 export default function AppProviders({
@@ -11,9 +12,11 @@ export default function AppProviders({
 }) {
   return (
     <LanguageProvider>
-      <CartProvider>
-        {children}
-      </CartProvider>
+      <SessionProvider>
+        <CartProvider>
+          {children}
+        </CartProvider>
+      </SessionProvider>
     </LanguageProvider>
   );
 }

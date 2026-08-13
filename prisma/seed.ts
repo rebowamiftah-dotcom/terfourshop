@@ -17,9 +17,65 @@ const prisma = new PrismaClient({ adapter });
 const uuid = () => uuidv7();
 
 async function main() {
-    // ===========
-    //    ROLES
-    // ===========
+    // HAPUS SEMUA DATA TABLE DAHULU
+
+    // Increase interactive transaction timeout to avoid commit timeouts on slow environments
+    await prisma.$transaction([
+        // =====================
+        // TRANSACTION / ORDER
+        // =====================
+        prisma.shipmentProof.deleteMany(),
+        prisma.shipment.deleteMany(),
+        prisma.payment.deleteMany(),
+        prisma.review.deleteMany(),
+        prisma.orderItem.deleteMany(),
+        prisma.sellerOrder.deleteMany(),
+        prisma.order.deleteMany(),
+
+        // =====================
+        // CART
+        // =====================
+        prisma.cartItem.deleteMany(),
+        prisma.cart.deleteMany(),
+
+        // =====================
+        // PRODUCT
+        // =====================
+        prisma.productCategory.deleteMany(),
+        prisma.productImage.deleteMany(),
+        prisma.product.deleteMany(),
+        prisma.category.deleteMany(),
+
+        // =====================
+        // STORE / SELLER
+        // =====================
+        prisma.store.deleteMany(),
+        prisma.sellerDocument.deleteMany(),
+        prisma.sellerBusiness.deleteMany(),
+        prisma.seller.deleteMany(),
+
+        // =====================
+        // USER
+        // =====================
+        prisma.profile.deleteMany(),
+        prisma.address.deleteMany(),
+        prisma.account.deleteMany(),
+        prisma.user.deleteMany(),
+
+        // =====================
+        // MASTER
+        // =====================
+        prisma.courier.deleteMany(),
+        prisma.paymentMethod.deleteMany(),
+        prisma.businessType.deleteMany(),
+        prisma.role.deleteMany(),
+    ], { maxWait: 20000 });
+
+    console.log("Data lama berhasil dihapus.");
+
+    // ===============
+    //    SEED ROLES
+    // ===============
 
     const roleIds = {
         customer: uuid(),
@@ -27,7 +83,7 @@ async function main() {
         admin: uuid(),
     };
 
-    await prisma.roles.createMany({
+    await prisma.role.createMany({
         data: [
             {
                 id: roleIds.customer,
@@ -51,13 +107,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ===========
-    //    USERS
-    // ===========
+    // ===============
+    //    SEED USERS
+    // ===============
 
     const userIds = Array.from({ length: 10 }, () => uuid());
 
-    await prisma.users.createMany({
+    await prisma.user.createMany({
         data: userIds.map((id, index) => ({
             id,
             username: `user${index + 1}`,
@@ -69,11 +125,11 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ============
-    //   PROFILES
-    // ============
+    // =================
+    //   SEED PROFILES
+    // =================
 
-    await prisma.profiles.createMany({
+    await prisma.profile.createMany({
         data: userIds.map((userId, index) => ({
             id: uuid(),
             user_id: userId,
@@ -85,13 +141,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // =============
-    //   ADDRESSES
-    // =============
+    // ==================
+    //   SEED ADDRESSES
+    // ==================
 
     const addressIds = Array.from({ length: 5 }, () => uuid());
 
-    await prisma.addresses.createMany({
+    await prisma.address.createMany({
         data: addressIds.map((id, index) => ({
             id,
             user_id: userIds[index],
@@ -106,13 +162,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ==================
-    //   BUSINESS_TYPES
-    // ==================
+    // =======================
+    //   SEED BUSINESS_TYPES
+    // =======================
 
     const businessTypeIds = [uuid(), uuid(), uuid()];
 
-    await prisma.business_types.createMany({
+    await prisma.businessType.createMany({
         data: [
             {
                 id: businessTypeIds[0],
@@ -136,13 +192,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ===========
-    //   SELLERS
-    // ===========
+    // ================
+    //   SEED SELLERS
+    // ================
 
     const sellerIds = userIds.slice(0, 3).map(() => uuid());
 
-    await prisma.sellers.createMany({
+    await prisma.seller.createMany({
         data: sellerIds.map((id, index) => ({
             id,
             user_id: userIds[index],
@@ -153,13 +209,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // =====================
-    //   SELLER_BUSINESSES
-    // =====================
+    // ==========================
+    //   SEED SELLER_BUSINESSES
+    // ==========================
 
     const sellerBusinessIds = sellerIds.map(() => uuid());
 
-    await prisma.seller_businesses.createMany({
+    await prisma.sellerBusiness.createMany({
         data: sellerBusinessIds.map((id, index) => ({
             id,
             seller_id: sellerIds[index],
@@ -171,13 +227,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ====================
-    //   SELLER_DOCUMENTS
-    // ====================
+    // =========================
+    //   SEED SELLER_DOCUMENTS
+    // =========================
 
     const sellerDocumentIds = sellerIds.map(() => uuid());
 
-    await prisma.seller_documents.createMany({
+    await prisma.sellerDocument.createMany({
         data: sellerDocumentIds.map((id, index) => ({
             id,
             seller_id: sellerIds[index],
@@ -190,13 +246,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ==========
-    //   STORES
-    // ==========
+    // ===============
+    //   SEED STORES
+    // ===============
 
     const storeIds = sellerIds.map(() => uuid());
 
-    await prisma.stores.createMany({
+    await prisma.store.createMany({
         data: storeIds.map((id, index) => ({
             id,
             seller_id: sellerIds[index],
@@ -214,14 +270,14 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ==============
-    //   CATEGORIES
-    // ==============
+    // ===================
+    //   SEED CATEGORIES
+    // ===================
 
     const categoryIds = Array.from({ length: 5 }, () => uuid());
     const categoryNames = ["Fashion", "Electronics", "Home", "Beauty", "Sports"];
 
-    await prisma.categories.createMany({
+    await prisma.category.createMany({
         data: categoryIds.map((id, index) => ({
             id,
             name: categoryNames[index],
@@ -231,13 +287,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ============
-    //   PRODUCTS
-    // ============
+    // =================
+    //   SEED PRODUCTS
+    // =================
 
     const productIds = Array.from({ length: 10 }, () => uuid());
 
-    await prisma.products.createMany({
+    await prisma.product.createMany({
         data: productIds.map((id, index) => ({
             id,
             store_id: storeIds[index % storeIds.length],
@@ -251,13 +307,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ==================
-    //   PRODUCT_IMAGES
-    // ==================
+    // =======================
+    //   SEED PRODUCT_IMAGES
+    // =======================
 
     const productImageIds = productIds.map(() => uuid());
 
-    await prisma.product_images.createMany({
+    await prisma.productImage.createMany({
         data: productImageIds.map((id, index) => ({
             id,
             product_id: productIds[index],
@@ -268,11 +324,11 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ======================
-    //   PRODUCT_CATEGORIES
-    // ======================
+    // ===========================
+    //   SEED PRODUCT_CATEGORIES
+    // ===========================
 
-    await prisma.product_categories.createMany({
+    await prisma.productCategory.createMany({
         data: productIds.map((productId, index) => ({
             product_id: productId,
             category_id: categoryIds[index % categoryIds.length],
@@ -280,13 +336,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // =========
-    //   CARTS
-    // =========
+    // ==============
+    //   SEED CARTS
+    // ==============
 
     const cartIds = userIds.slice(0, 3).map(() => uuid());
 
-    await prisma.carts.createMany({
+    await prisma.cart.createMany({
         data: cartIds.map((id, index) => ({
             id,
             user_id: userIds[index],
@@ -294,11 +350,11 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ==============
-    //   CART_ITEMS
-    // ==============
+    // ===================
+    //   SEED CART_ITEMS
+    // ===================
 
-    await prisma.cart_items.createMany({
+    await prisma.cartItem.createMany({
         data: [
             {
                 id: uuid(),
@@ -334,13 +390,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ==========
-    //   ORDERS
-    // ==========
+    // ===============
+    //   SEED ORDERS
+    // ===============
 
     const orderIds = Array.from({ length: 3 }, () => uuid());
 
-    await prisma.orders.createMany({
+    await prisma.order.createMany({
         data: orderIds.map((id, index) => ({
             id,
             user_id: userIds[3 + index],
@@ -354,13 +410,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // =================
-    //   SELLER_ORDERS
-    // =================
+    // ======================
+    //   SEED SELLER_ORDERS
+    // ======================
 
     const sellerOrderIds = Array.from({ length: 3 }, () => uuid());
 
-    await prisma.seller_orders.createMany({
+    await prisma.sellerOrder.createMany({
         data: sellerOrderIds.map((id, index) => ({
             id,
             order_id: orderIds[index],
@@ -374,13 +430,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ===============
-    //   ORDER_ITEMS
-    // ===============
+    // ====================
+    //   SEED ORDER_ITEMS
+    // ====================
 
     const orderItemIds = Array.from({ length: 4 }, () => uuid());
 
-    await prisma.order_items.createMany({
+    await prisma.orderItem.createMany({
         data: [
             {
                 id: orderItemIds[0],
@@ -422,13 +478,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ===================
-    //   PAYMENT_METHODS
-    // ===================
+    // ========================
+    //   SEED PAYMENT_METHODS
+    // ========================
 
     const paymentMethodIds = [uuid(), uuid(), uuid()];
 
-    await prisma.payment_methods.createMany({
+    await prisma.paymentMethod.createMany({
         data: [
             {
                 id: paymentMethodIds[0],
@@ -452,11 +508,11 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ============
-    //   PAYMENTS
-    // ============
+    // =================
+    //   SEED PAYMENTS
+    // =================
 
-    await prisma.payments.createMany({
+    await prisma.payment.createMany({
         data: orderIds.map((orderId, index) => ({
             id: uuid(),
             order_id: orderId,
@@ -468,13 +524,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ============
-    //   COURIERS
-    // ============
+    // =================
+    //   SEED COURIERS
+    // =================
 
     const courierIds = [uuid(), uuid()];
 
-    await prisma.couriers.createMany({
+    await prisma.courier.createMany({
         data: [
             {
                 id: courierIds[0],
@@ -490,13 +546,13 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // =============
-    //   SHIPMENTS
-    // =============
+    // ==================
+    //   SEED SHIPMENTS
+    // ==================
 
     const shipmentIds = [uuid(), uuid()];
 
-    await prisma.shipments.createMany({
+    await prisma.shipment.createMany({
         data: [
             {
                 id: shipmentIds[0],
@@ -520,11 +576,11 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ===================
-    //   SHIPMENT_PROOFS
-    // ===================
+    // ========================
+    //   SEED SHIPMENT_PROOFS
+    // ========================
 
-    await prisma.shipment_proofs.createMany({
+    await prisma.shipmentProof.createMany({
         data: [
             {
                 id: uuid(),
@@ -542,11 +598,11 @@ async function main() {
         skipDuplicates: true,
     });
 
-    // ===========
-    //   REVIEWS
-    // ===========
+    // ================
+    //   SEED REVIEWS
+    // ================
 
-    await prisma.reviews.createMany({
+    await prisma.review.createMany({
         data: [
             {
                 id: uuid(),
