@@ -75,7 +75,7 @@ export default function RegisterPage() {
             </div>
             
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
-              Buat Akun Baru <br />
+              Buat Akun <br />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300">
                 TerfourShop
               </span>

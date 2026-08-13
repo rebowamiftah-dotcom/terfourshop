@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useHeader } from '../Contexts/HeaderContext';
 import { useLanguage } from '../Contexts/LanguageContext';
 import { getLangKey } from '@/app/lib/language';
@@ -20,6 +22,9 @@ type NavbarProps = {
 };
 
 export default function Navbar({ menus }: NavbarProps) {
+  const router = useRouter();
+  const [isRegistered, setIsRegistered] = useState(false);
+
   const {
     isMobileMenuOpen,
     setIsMobileMenuOpen,
@@ -29,6 +34,29 @@ export default function Navbar({ menus }: NavbarProps) {
   const {
     language
   } = useLanguage();
+
+  useEffect(() => {
+    // Pengecekan status pendaftaran dari localStorage
+    const registeredUser = localStorage.getItem("isRegistered");
+    if (registeredUser === "true") {
+      setIsRegistered(true);
+    }
+  }, []);
+
+  // Fungsi pengatur arah link menu
+  const getMenuHref = (href: string, titleId: string) => {
+    // Pengecekan spesifik untuk menu Belanja / Shopping
+    if (href === '/shopping' || href === '/shop' || titleId.toLowerCase().includes('belanja')) {
+      if (!isRegistered) {
+        return '/register';
+      }
+      if (isLoggedIn) {
+        return '/shopping';
+      }
+      return '/login';
+    }
+    return href;
+  };
 
   return (
     <nav className="flex items-center justify-between h-16 md:h-18 gap-4">
@@ -42,7 +70,7 @@ export default function Navbar({ menus }: NavbarProps) {
           <NavLink
             key={`${index}-${language}`}
             title={title[getLangKey(language)]}
-            href={href}
+            href={getMenuHref(href, title.id)}
             className="text-md font-semibold text-gray-300 hover:text-white transition-colors"
           />
         ))}
