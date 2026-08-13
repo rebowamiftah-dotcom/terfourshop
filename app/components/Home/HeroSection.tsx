@@ -76,7 +76,7 @@ export default function HeroSection() {
         {/* Call to Action Buttons */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 w-full justify-center max-w-sm sm:max-w-md">
           <Link
-            href="/shop"
+            href="/shopping"
             className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-purple-500/25 transition-all duration-300 hover:scale-105 text-center text-sm sm:text-base"
           >
             Jelajahi Toko
