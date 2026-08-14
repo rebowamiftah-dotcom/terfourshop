@@ -1,64 +1,42 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
-// --- DUMMY DATA PRODUCTS ---
-const PRODUCTS = [
-  {
-    id: 1,
-    name: "T-shirt Patrick Jane",
-    category: "Pakaian",
-    price: "Rp.300.000",
-    rating: "4.9",
-    tag: "Best Seller",
-    image: "🎧",
-    isLimitedEdition: false,
-  },
-  {
-    id: 2,
-    name: "Gelang Loopy",
-    category: "Aksesoris",
-    price: "Rp.1.500.000",
-    rating: "4.8",
-    tag: "Hot item",
-    image: "🧥",
-    isLimitedEdition: false,
-  },
-  {
-    id: 3,
-    name: "Nike Spongebob Squarepants",
-    category: "Sepatu",
-    price: "Rp.4.000.000",
-    rating: "5.0",
-    tag: "Limited Edition",
-    image: "🪷",
-    isLimitedEdition: true, // CARD TIMBUL & PROMINENT
-  },
-  {
-    id: 4,
-    name: "Monitor SAMSUNG",
-    category: "Elektronik",
-    price: "Rp.3.500.000",
-    rating: "4.7",
-    tag: "New",
-    image: "🔊",
-    isLimitedEdition: false,
-  },
-];
-
 // FUNGSI CEK APABILA HARGA >= 1 JUTA
-const checkIsPriceOneMillionOrMore = (priceString: string) => {
-  const numericValue = parseInt(priceString.replace(/\D/g, ""), 10);
-  return numericValue >= 1000000;
+const checkIsPriceOneMillionOrMore = (priceNumber: number) => {
+  return priceNumber >= 1000000;
 };
 
 export default function FeaturedProducts() {
   const router = useRouter();
   
-  // --- STATE STATUS PENDAFTARAN / LOGIN ---
+  // --- STATE DATA PRODUK & STATUS LOGIN ---
+  const [popularProducts, setPopularProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isRegistered, setIsRegistered] = useState(false);
+
+  // --- FETCH DATA PRODUK DARI DATABASE API ---
+  useEffect(() => {
+    const fetchPopularProducts = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+
+        if (data.success) {
+          // Ambil 4 produk teratas untuk ditampilkan sebagai produk populer
+          setPopularProducts(data.products.slice(0, 4));
+        }
+      } catch (err) {
+        console.error("Gagal memuat produk populer:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPopularProducts();
+  }, []);
 
   // --- LOGIKA TOMBOL PERGI KE TOKO ---
   const handleGoToStore = () => {
@@ -68,6 +46,20 @@ export default function FeaturedProducts() {
       router.push("/shopping");
     }
   };
+
+  if (isLoading) {
+    return (
+      <section className="py-24 bg-slate-900/30 border-t border-white/5 relative text-white text-center">
+        <p className="text-xs font-mono text-cyan-400 tracking-widest animate-pulse">
+          LOADING POPULAR VAULT...
+        </p>
+      </section>
+    );
+  }
+
+  if (popularProducts.length === 0) {
+    return null; // Sembunyikan jika database masih kosong
+  }
 
   return (
     <section className="py-24 bg-slate-900/30 border-t border-white/5 relative text-white">
@@ -82,9 +74,17 @@ export default function FeaturedProducts() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
-          {PRODUCTS.map((item, index) => {
-            const isLimited = item.isLimitedEdition;
-            const isExpensive = checkIsPriceOneMillionOrMore(item.price);
+          {popularProducts.map((item, index) => {
+            // Tentukan card ketiga/tertentu sebagai Limited Edition secara dinamis atau berdasarkan tag
+            const isLimited = index === 2 || item.tag === "Limited";
+            
+            const rawPrice = Number(item.price) || 0;
+            const priceFormatted = `Rp.${rawPrice.toLocaleString("id-ID")}`;
+            const isExpensive = checkIsPriceOneMillionOrMore(rawPrice);
+
+            // Ekstraksi data relasi dari database
+            const categoryName = item.product_categories?.[0]?.categories?.name || "UMUM";
+            const primaryImage = item.product_images?.[0]?.image_url || "";
 
             return (
               <motion.div
@@ -152,21 +152,36 @@ export default function FeaturedProducts() {
                           : "bg-purple-500/20 text-purple-300 border border-purple-500/30"
                       }`}
                     >
-                      {item.tag}
+                      {item.tag || (isLimited ? "Limited Edition" : "Best Seller")}
                     </span>
                     <span className="text-xs text-amber-400 font-semibold flex items-center gap-1">
-                      ⭐ {item.rating}
+                      ⭐ {item.rating || "5.0"}
                     </span>
                   </div>
 
+                  {/* KOTAK VISUAL (MENAMPILKAN GAMBAR JIKA ADA, ATAU NAMA PRODUK SEBAGAI ESTETIKA) */}
                   <div
-                    className={`w-full h-44 rounded-xl flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-200 my-2 relative ${
+                    className={`w-full h-44 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200 my-2 relative overflow-hidden text-center p-3 ${
                       isLimited
                         ? "bg-gradient-to-b from-amber-500/10 to-pink-500/10 border border-amber-500/20"
                         : "bg-slate-900/80"
                     }`}
                   >
-                    {item.image}
+                    {primaryImage && primaryImage.startsWith("http") ? (
+                      <img 
+                        src={primaryImage} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "https://via.placeholder.com/300x300/0f172a/a855f7?text=No+Image";
+                        }}
+                      />
+                    ) : (
+                      <span className="text-sm sm:text-base font-black text-slate-200 tracking-wide line-clamp-2">
+                        {item.name}
+                      </span>
+                    )}
                   </div>
 
                   <div className="mt-4">
@@ -177,7 +192,7 @@ export default function FeaturedProducts() {
                           : "text-slate-400"
                       }`}
                     >
-                      {item.category}
+                      {categoryName}
                     </p>
                     <h3
                       className={`text-base font-bold mt-1 line-clamp-1 transition-colors ${
@@ -189,7 +204,7 @@ export default function FeaturedProducts() {
                       {item.name}
                     </h3>
 
-                    {/* KONTAINER HARGA DAN TOMBOL (DIATUR GAP AGAR TIDAK MEPET) */}
+                    {/* KONTAINER HARGA DAN TOMBOL */}
                     <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5 gap-2">
                       <span
                         className={`font-black shrink-0 ${
@@ -198,16 +213,16 @@ export default function FeaturedProducts() {
                             : "text-base sm:text-lg"
                         } ${isLimited ? "text-amber-300" : "text-white"}`}
                       >
-                        {item.price}
+                        {priceFormatted}
                       </span>
 
-                      {/* TOMBOL PERGI KE TOKO (UKURAN DIPERKECEIL APABILA HARGA >= 1 JUTA) */}
+                      {/* TOMBOL PERGI KE TOKO / DETAIL */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleGoToStore();
                         }}
-                        className={`rounded-lg font-semibold transition-all duration-200 flex items-center gap-1 shrink-0 active:scale-95 ${
+                        className={`rounded-lg font-semibold transition-all duration-200 flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer ${
                           isExpensive
                             ? "px-2.5 py-1.5 text-[10px]"
                             : "px-3.5 py-2 text-xs"
