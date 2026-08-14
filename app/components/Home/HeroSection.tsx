@@ -43,15 +43,12 @@ export default function HeroSection() {
       {/* 3D BACKGROUND CONTAINER */}
       <Background />
 
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none z-0" />
-
       {/* MAIN CONTENT CONTAINER */}
       <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center text-center h-full max-h-[900px] py-12"
+        className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center text-center h-full max-h-[1000px] py-12"
       >
         {/* Badge Pengumuman */}
         <motion.div variants={itemVariants}>

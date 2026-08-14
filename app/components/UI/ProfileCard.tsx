@@ -1,4 +1,7 @@
-import React, { useEffect, useRef, useCallback, useMemo, useState } from 'react';
+"use client";
+
+import Image from 'next/image';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 
 const DEFAULT_INNER_GRADIENT = 'linear-gradient(145deg,#60496e8c 0%,#71C4FF44 100%)';
 
@@ -22,8 +25,16 @@ if (typeof document !== 'undefined' && !document.getElementById(KEYFRAMES_ID)) {
   style.id = KEYFRAMES_ID;
   style.textContent = `
     @keyframes pc-holo-bg {
-      0% { background-position: 0 var(--background-y), 0 0, center; }
-      100% { background-position: 0 var(--background-y), 90% 90%, center; }
+      0% {
+        background-position: 0 var(--background-y), 0 0, center;
+        -webkit-mask-position: top calc(200% - (var(--background-y) * 5)) left calc(100% - var(--background-x));
+        mask-position: top calc(200% - (var(--background-y) * 5)) left calc(100% - var(--background-x));
+      }
+      100% {
+        background-position: 0 var(--background-y), 90% 90%, center;
+        -webkit-mask-position: top calc(200% - (var(--background-y) * 5)) left calc(var(--background-x));
+        mask-position: top calc(200% - (var(--background-y) * 5)) left calc(var(--background-x));
+      }
     }
   `;
   document.head.appendChild(style);
@@ -63,7 +74,7 @@ interface TiltEngine {
 const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   avatarUrl = '<Placeholder for avatar URL>',
   iconUrl = '<Placeholder for icon URL>',
-  grainUrl = '<Placeholder for grain URL>',
+  grainUrl = '/grain.png',
   innerGradient,
   behindGlowEnabled = true,
   behindGlowColor,
@@ -83,6 +94,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
+  const shineRef = useRef<HTMLDivElement>(null);
 
   const enterTimerRef = useRef<number | null>(null);
   const leaveRafRef = useRef<number | null>(null);
@@ -221,6 +233,12 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 
       shell.classList.add('active');
       shell.classList.add('entering');
+      if (wrapRef.current) wrapRef.current.style.setProperty('--card-opacity', '1');
+      if (wrapRef.current) {
+        wrapRef.current.style.setProperty('--holo-play', '1');
+        wrapRef.current.style.setProperty('--holo-opacity', '1');
+        if (shineRef.current) shineRef.current.style.animationPlayState = 'running';
+      }
       if (enterTimerRef.current) window.clearTimeout(enterTimerRef.current);
       enterTimerRef.current = window.setTimeout(() => {
         shell.classList.remove('entering');
@@ -243,6 +261,12 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       const settled = Math.hypot(tx - x, ty - y) < 0.6;
       if (settled) {
         shell.classList.remove('active');
+        if (wrapRef.current) wrapRef.current.style.setProperty('--card-opacity', '0');
+          if (wrapRef.current) {
+            wrapRef.current.style.setProperty('--holo-play', '0');
+            wrapRef.current.style.setProperty('--holo-opacity', '0.5');
+          }
+          if (shineRef.current) shineRef.current.style.animationPlayState = 'paused';
         leaveRafRef.current = null;
       } else {
         leaveRafRef.current = requestAnimationFrame(checkSettle);
@@ -340,6 +364,8 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 
   const cardStyle = useMemo(
     () => ({
+      '--holo-play': '0',
+      '--holo-opacity': '0.5',
       '--icon': iconUrl ? `url(${iconUrl})` : 'none',
       '--grain': grainUrl ? `url(${grainUrl})` : 'none',
       '--inner-gradient': innerGradient ?? DEFAULT_INNER_GRADIENT,
@@ -376,16 +402,21 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     onContactClick?.();
   }, [onContactClick]);
 
-  // Complex styles that require CSS variables and can't be done with Tailwind
   const shineStyle = {
     maskImage: 'var(--icon)',
+    WebkitMaskImage: 'var(--icon)',
     maskMode: 'luminance',
+    WebkitMaskRepeat: 'repeat',
     maskRepeat: 'repeat',
+    WebkitMaskSize: '150%',
     maskSize: '150%',
+    WebkitMaskPosition: 'top calc(200% - (var(--background-y) * 5)) left calc(100% - var(--background-x))',
     maskPosition: 'top calc(200% - (var(--background-y) * 5)) left calc(100% - var(--background-x))',
-    filter: 'brightness(0.66) contrast(1.33) saturate(0.33) opacity(0.5)',
+    filter: 'brightness(0.66) contrast(1.33) saturate(0.33) opacity(var(--holo-opacity))',
     animation: 'pc-holo-bg 18s linear infinite',
-    animationPlayState: 'running' as const,
+    animationPlayState: 'paused' as const,
+    // respect --holo-play (0 or 1) to decide if animation runs
+    willChange: 'mask-position, background-position',
     mixBlendMode: 'color-dodge' as const,
     transform: 'translate3d(0, 0, 1px)',
     overflow: 'hidden' as const,
@@ -422,7 +453,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     `.replace(/\s+/g, ' '),
     gridArea: '1 / -1',
     borderRadius: cardRadius,
-    pointerEvents: 'none' as const
+    pointerEvents: 'none' as const,
   };
 
   const glareStyle: React.CSSProperties = {
@@ -497,15 +528,11 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
               gridArea: '1 / -1'
             }}
           >
-            {/* Shine layer */}
-            <div style={shineStyle} />
-
-            {/* Glare layer */}
+            <div ref={shineRef as any} style={shineStyle} />
             <div style={glareStyle} />
 
-            {/* Avatar content */}
             <div
-              className="overflow-visible"
+              className="relative overflow-hidden"
               style={{
                 mixBlendMode: 'luminosity',
                 transform: 'translateZ(2px)',
@@ -515,16 +542,14 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                 backfaceVisibility: 'hidden'
               }}
             >
-              <img
-                className="w-full absolute left-1/2 bottom-[-1px] will-change-transform transition-transform duration-[120ms] ease-out"
+              <Image
+                fill
+                className="absolute inset-0 object-cover"
                 src={avatarUrl}
                 alt={`${name || 'User'} avatar`}
                 loading="lazy"
                 style={{
-                  transformOrigin: '50% 100%',
-                  transform:
-                    'translateX(calc(-50% + (var(--pointer-from-left) - 0.5) * 6px)) translateZ(0) scaleY(calc(1 + (var(--pointer-from-top) - 0.5) * 0.02)) scaleX(calc(1 + (var(--pointer-from-left) - 0.5) * 0.01))',
-                  borderRadius: cardRadius,
+                  transformOrigin: '50% 50%',
                   backfaceVisibility: 'hidden'
                 }}
                 onError={e => {
@@ -532,33 +557,33 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                   t.style.display = 'none';
                 }}
               />
+
               {showUserInfo && (
                 <div
                   className="absolute z-[2] flex items-center justify-between backdrop-blur-[30px] border border-white/10 pointer-events-auto"
-                  style={
-                    {
-                      '--ui-inset': '20px',
-                      '--ui-radius-bias': '6px',
-                      bottom: 'var(--ui-inset)',
-                      left: 'var(--ui-inset)',
-                      right: 'var(--ui-inset)',
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      borderRadius: 'calc(max(0px, var(--card-radius) - var(--ui-inset) + var(--ui-radius-bias)))',
-                      padding: '12px 14px'
-                    } as React.CSSProperties
-                  }
+                  style={{
+                    '--ui-inset': '20px',
+                    '--ui-radius-bias': '6px',
+                    bottom: 'var(--ui-inset)',
+                    left: 'var(--ui-inset)',
+                    right: 'var(--ui-inset)',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: 'calc(max(0px, var(--card-radius) - var(--ui-inset) + var(--ui-radius-bias)))',
+                    padding: '12px 14px'
+                  } as React.CSSProperties}
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className="rounded-full overflow-hidden border border-white/10 flex-shrink-0"
+                      className="relative rounded-full overflow-hidden border border-white/10 flex-shrink-0"
                       style={{ width: '48px', height: '48px' }}
                     >
-                      <img
-                        className="w-full h-full object-cover rounded-full"
+                      <Image
+                        fill
+                        className="absolute inset-0 object-cover rounded-full"
                         src={miniAvatarUrl || avatarUrl}
                         alt={`${name || 'User'} mini avatar`}
                         loading="lazy"
-                        style={{ display: 'block', gridArea: 'auto', borderRadius: '50%', pointerEvents: 'auto' }}
+                        style={{ display: 'block', gridArea: 'auto', pointerEvents: 'auto' }}
                         onError={e => {
                           const t = e.target as HTMLImageElement;
                           t.style.opacity = '0.5';
@@ -584,7 +609,6 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
               )}
             </div>
 
-            {/* Details content */}
             <div
               className="max-h-full overflow-hidden text-center relative z-[5]"
               style={{

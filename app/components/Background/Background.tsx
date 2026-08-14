@@ -6,7 +6,7 @@ import { hyperspeedPresets } from './HyperSpeedPresets';
 import { motion } from 'framer-motion';
 
 const Hyperspeed = dynamic(
-  () => import('./HyperSpeed'),
+  () => import('../UI/HyperSpeed'),
   { ssr: false }
 );
 

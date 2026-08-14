@@ -7,21 +7,9 @@ import type { Adapter, AdapterUser } from "next-auth/adapters";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
 
-import { v7 as uuidv7 } from "uuid";
 import bcrypt from "bcryptjs";
-
-function generateUsername(email: string): string {
-  const base = email
-    .split("@")[0]
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-
-  const random = Math.random()
-    .toString(36)
-    .substring(2, 8);
-
-  return `${base}_${random}`;
-}
+import { v7 as uuidv7 } from "uuid";
+import { generateUsername } from "./utils";
 
 const baseAdapter = PrismaAdapter(prisma);
 
@@ -94,8 +82,7 @@ export const authOptions: AuthOptions = {
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
       authorization: {
         params: {
-          // Atur agar selalu pilih akun terlebih dahulu
-          prompt: "select_account",
+          prompt: "select_account",   // Atur agar selalu pilih akun terlebih dahulu
         },
       },
     }),
@@ -103,7 +90,7 @@ export const authOptions: AuthOptions = {
     CredentialProvider({
       name: "Credentials",
       credentials: {
-        login: { label: "Username atau Email", type: "text" },
+        login: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
