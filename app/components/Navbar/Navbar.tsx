@@ -83,8 +83,8 @@ export default function Navbar({ menus }: NavbarProps) {
           <ImageUser link="/profile" img="/jason.jpg" />
         ) : (
           <div className="flex items-center gap-2">
-            <Link href="/register" className="text-white font-semibold px-3 py-2 rounded-md hover:text-gray-300 transition-colors hidden lg:block">
-              {language === "ID" ? "Daftar" : "Register"}
+            <Link href="/registrasi" className="text-white font-semibold px-3 py-2 rounded-md hover:text-gray-300 transition-colors hidden lg:block">
+              {language === "ID" ? "Daftar" : "Registrasi"}
             </Link>
             <Link href="/login" className="bg-white text-black font-semibold px-3 py-2 rounded-md hover:bg-gray-200 transition-all active:scale-95">
               {language === "ID" ? "Masuk" : "Login"}

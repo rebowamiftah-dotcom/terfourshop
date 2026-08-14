@@ -33,27 +33,19 @@ export default function LoginPage() {
     },
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Payload Login:", formData);
   };
 
   return (
     <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-slate-950 text-white">
-      {/* 3D BACKGROUND CONTAINER */}
-     
-
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none z-0" />
-
-      {/* MAIN CONTENT CONTAINER */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center text-center h-full max-h-[900px] py-12"
       >
-        {/* Card Container Glassmorphism */}
         <motion.div
           variants={itemVariants}
           className="w-full max-w-md p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl shadow-purple-950/20 text-left"
@@ -129,7 +121,7 @@ export default function LoginPage() {
           <div className="mt-6 pt-6 border-t border-white/10 text-center text-xs text-slate-400">
             Belum memiliki akun?{" "}
             <Link
-              href="/register"
+              href="/registrasi"
               className="font-semibold text-purple-300 hover:text-pink-400 transition-colors"
             >
               Daftar akun baru

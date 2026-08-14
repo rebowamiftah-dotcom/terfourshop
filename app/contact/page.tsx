@@ -79,7 +79,7 @@ export default function Contact() {
 
     // Logika Cek Pendaftaran: Jika belum terdaftar, arahkan ke /register
     if (!isRegistered) {
-      router.push("/register");
+      router.push("/registrasi");
       return;
     }
 
