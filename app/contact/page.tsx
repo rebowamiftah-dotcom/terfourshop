@@ -21,7 +21,7 @@ const DIRECT_CONTACTS = [
   {
     id: 2,
     title: "Email Support Resmi",
-    detail: "support@terfourshop.id",
+    detail: "support@terfourshop.com",
     actionText: "Kirim Email",
     href: "mailto:support@terfourshop.id?subject=Kritik%20dan%20Saran%20TerfourShop",
     icon: "✉️",
@@ -277,7 +277,7 @@ export default function Contact() {
                         required
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="Contoh: Alex Rivers"
+                        placeholder="Contoh: Heri Kurniawan"
                         className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
                       />
                     </div>
@@ -293,7 +293,7 @@ export default function Contact() {
                         required
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="alex@example.com"
+                        placeholder="Heri@gmail.com"
                         className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
                       />
                     </div>
@@ -384,7 +384,7 @@ export default function Contact() {
                     disabled={isSubmitting}
                     className="w-full py-4 rounded-xl bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-400 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-purple-500/25 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                   >
-                    {isSubmitting ? "Mengirim Masukan..." : "Kirim Kritik & Saran 🚀"}
+                    {isSubmitting ? "Mengirim Masukan..." : "Kirim Kritik & Saran"}
                   </button>
                 </form>
               )}
