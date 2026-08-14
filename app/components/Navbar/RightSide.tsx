@@ -19,7 +19,8 @@ const RightSide = ({ title, link, img }: RightSideProps) => {
           className="object-contain rounded-full"
         />
       </Link>
-      <Link href={link} className="font-bold text-2xl tracking-tight text-white group-hover:text-gray-300 transition-colors hidden sm:inline">
+      <Link href={link} className="font-bold text-2xl tracking-tight text-white group-hover:text-gray-300 transition-colors hidden sm:inline ">
+      
         {title}
       </Link>
     </div>

@@ -1,4 +1,4 @@
-import type { HyperspeedOptions } from './HyperSpeed';
+import type { HyperspeedOptions } from '../UI/HyperSpeed';
 
 export const hyperspeedPresets: Record<string, HyperspeedOptions> = {
   one: {

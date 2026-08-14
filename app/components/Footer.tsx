@@ -67,7 +67,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/register" className="hover:text-purple-300 transition-colors">
+                <Link href="/registrasi" className="hover:text-purple-300 transition-colors">
                   Gabung Member
                 </Link>
               </li>

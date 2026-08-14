@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { motion, Variants } from 'framer-motion';
-// Pastikan path import ProfileCard ini benar sesuai struktur folder Anda
-import ProfileCard from '../components/ProfileCard'; 
+import CardProfileList from '../components/About/CardProfileList';
 
 // --- KONFIGURASI ANIMASI ---
 const fadeInUp: Variants = {
@@ -15,49 +14,7 @@ const fadeInUp: Variants = {
   }
 };
 
-const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.2 } // Jeda antar elemen anak
-  }
-};
-
-// --- DATA DUMMY UNTUK PROFILE CARDS ---
-const TEAM_MEMBERS = [
-  {
-    id: 1,
-    name: "Fauzian Ahmad P.",
-    title: "Captain",
-    handle: "Front-end, Database, Backend Development",
-    status: "SMK Teratai Putih Global 4 Bekasi",
-    avatarUrl: "/jason.jpg", // Ganti dengan gambar di folder public Anda
-    glowColor: "rgba(16, 185, 129, 0.6)" // Hijau
-  },
-  {
-    id: 2,
-    name: "Rebowa Miftahurrahman",
-    title: "Fullstack",
-    handle: "Front-end Development",
-    status: "SMK Teratai Putih Global 4 Bekasi",
-    avatarUrl: "/jason.jpg", // Ganti dengan gambar di folder public Anda
-    glowColor: "rgba(56, 189, 248, 0.6)" // Biru
-  },
-  {
-    id: 3,
-    name: "Mochamad Fakhri A.A",
-    title: "Development",
-    handle: "Frontend Development",
-    status: "SMK Teratai Putih Global 4 Bekasi",
-    avatarUrl: "/jason.jpg", // Ganti dengan gambar di folder public Anda
-    glowColor: "rgba(217, 70, 239, 0.6)" // Pink
-  }
-];
-
 export default function AboutCyberPage() {
-  // Gradasi inner standar bertema cyber
-  const cyberInnerGradient = 'linear-gradient(145deg, rgba(20, 20, 20, 0.3) 0%, rgba(50, 50, 50, 0.3) 100%)';
-
   return (
     <>
       {/* Tambahkan CSS Glitch via Tag Style Global (Optional, jika ingin efek glitch pada teks) */}
@@ -121,7 +78,7 @@ export default function AboutCyberPage() {
             className="text-center space-y-6"
           >
             <span className="inline-block text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-950/50 px-4 py-1.5 rounded-full border border-emerald-700 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-              // System Protocol: Core Team & History
+              $~ System Protocol: Core Team & History
             </span>
             
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-tight">
@@ -133,35 +90,8 @@ export default function AboutCyberPage() {
             </p>
           </motion.section>
 
-          {/* 2. SECTION 3 PROFILE CARDS BERJEJER */}
-          <motion.section 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center justify-items-center"
-          >
-            {TEAM_MEMBERS.map((member) => (
-              <motion.div key={member.id} variants={fadeInUp} className="w-full flex justify-center">
-                <ProfileCard 
-                  avatarUrl={member.avatarUrl}
-                  innerGradient={cyberInnerGradient}
-                  behindGlowColor={member.glowColor}
-                  behindGlowSize="60%"
-                  name={member.name}
-                  title={member.title}
-                  handle={member.handle}
-                  status={member.status}
-                  // contactText="View Protocol" // Baris ini tidak diperlukan lagi
-                  enableMobileTilt={true}
-                  // onContactClick={() => alert(`Mengakses protokol ${member.name}...`)} // Baris ini tidak diperlukan lagi
-                  showUserInfo={false} // MENYEMBUNYIKAN TOMBOL DAN INFO PENGGUNA DI BAWAH AVATAR
-                  // Menambahkan shadow agar kartu lebih pop out
-                  className="shadow-[0_10px_40px_rgba(0,0,0,0.7)]"
-                />
-              </motion.div>
-            ))}
-          </motion.section>
+          {/* List Profil Anggota Pengembang */}
+          <CardProfileList />
 
           {/* 3. SECTION KISAH TERFOURSHOP (SEKARANG DI BAWAH CARDS) */}
           <motion.section 

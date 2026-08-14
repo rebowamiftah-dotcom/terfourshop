@@ -58,7 +58,7 @@ export default function FeaturesAndFlashSale() {
   // --- LOGIKA TOMBOL PERGI KE TOKO / KLAIM PROMO ---
   const handleGoToStore = () => {
     if (!isRegistered) {
-      router.push("/register");
+      router.push("/registrasi");
     } else {
       router.push("/shopping");
     }

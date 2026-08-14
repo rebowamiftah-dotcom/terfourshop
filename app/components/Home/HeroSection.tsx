@@ -1,16 +1,11 @@
 "use client";
 
-import { motion, useSpring, useTransform, Variants } from "framer-motion";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-
+import { motion, Variants } from "framer-motion";
 import Link from "next/link";
 import Background from "../Background/Background";
 import CountUp from "../CountUp"; // Impor komponen CountUp (sesuaikan path foldernya)
 
 export default function HeroSection() {
-  const router = useRouter();
-
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -39,15 +34,12 @@ export default function HeroSection() {
       {/* 3D BACKGROUND CONTAINER */}
       <Background />
 
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none z-0" />
-
       {/* MAIN CONTENT CONTAINER */}
       <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center text-center h-full max-h-[900px] py-12"
+        className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center text-center h-full max-h-[1000px] py-12"
       >
         {/* Badge Pengumuman */}
         <motion.div variants={itemVariants}>
