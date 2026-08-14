@@ -33,7 +33,7 @@ export default function MobileNav(
   }
 
   return (
-        <div className="tablet:hidden bg-zinc-900 border-t border-zinc-800 px-4 pt-3 pb-6 space-y-3">
+        <div className="absolute left-0 right-0 top-full z-50 bg-zinc-900/95 border-t border-zinc-800 px-4 pt-3 pb-6 space-y-3 max-h-[80vh] overflow-auto backdrop-blur-sm shadow-lg tablet:hidden">
           {/* Navigasi */}
           {menus.map(({ title, href }, index) => (
             <NavLink
@@ -52,11 +52,11 @@ export default function MobileNav(
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 <Link 
-                  href="/register" 
+                  href="/registrasi" 
                   className="block w-full text-center border border-zinc-700 text-white font-semibold py-2 rounded-lg transition-all duration-200 hover:border-zinc-500 hover:bg-zinc-800"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {language === "ID" ? "Daftar" : "Register"}
+                  {language === "ID" ? "Daftar" : "Registrasi"}
                 </Link>
                 <Link 
                   href="/login" 
