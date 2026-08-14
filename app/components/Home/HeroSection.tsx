@@ -1,19 +1,50 @@
 "use client";
 
+// 1. Tambahkan useState & useEffect di sini
+import { useState, useEffect } from "react"; 
 import { motion, Variants } from "framer-motion";
 import Link from "next/link";
+// 2. Tambahkan useRouter dari next/navigation untuk handleExploreClick
+import { useRouter } from "next/navigation"; 
+
 import Background from "../Background/Background";
 import CountUp from "../CountUp"; 
 
-import { useLanguage } from "../Contexts/LanguageContext"; // Sesuaikan path ini jika berbeda
+import { useLanguage } from "../Contexts/LanguageContext"; // Sesuaikan path jika berbeda
 import { getLangKey } from "@/app/lib/language";
 import { dictionary } from "@/app/_dictionaries/HeroSection";
 
 export default function HeroSection() {
+  const router = useRouter(); // Inisialisasi router
   const { language } = useLanguage();
 
   // Pilih teks sesuai bahasa aktif (default ke 'id')
   const text = dictionary[getLangKey(language)];
+
+  // State untuk status pendaftaran dan login
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Pengecekan status pendaftaran dan login dari localStorage/auth
+    const registeredUser = localStorage.getItem("isRegistered");
+    const loggedInUser = localStorage.getItem("isLoggedIn");
+
+    if (registeredUser === "true") setIsRegistered(true);
+    if (loggedInUser === "true") setIsLoggedIn(true);
+  }, []);
+
+  // Handler navigasi tombol "Jelajahi Toko"
+  const handleExploreClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (!isRegistered) {
+      router.push("/register");
+    } else if (isLoggedIn) {
+      router.push("/shopping");
+    } else {
+      router.push("/login");
+    }
+  };
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -78,6 +109,7 @@ export default function HeroSection() {
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 w-full justify-center max-w-sm sm:max-w-md">
           <Link
             href="/shopping"
+            onClick={handleExploreClick}
             className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-purple-500/25 transition-all duration-300 hover:scale-105 text-center text-sm sm:text-base"
           >
             {text.btnShop}
