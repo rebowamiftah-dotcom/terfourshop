@@ -40,3 +40,9 @@ export function normalizePhone(phone: string): string {
 
   return normalized;
 }
+
+export function isExpired(expiredAt?: Date | null): boolean {
+  if (!expiredAt) return true;
+
+  return new Date() > expiredAt;
+}

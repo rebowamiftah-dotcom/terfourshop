@@ -19,14 +19,15 @@ function setDefaultToastDuration(ms: number) {
 type ToastAddArg = (Parameters<typeof _toastManager.add>[0]) & { duration?: number };
 
 function addWithDefault(opts?: ToastAddArg) {
-  const copy = { ...(opts ?? {}) };
+  const copy: ToastAddArg = { ...(opts as ToastAddArg) };
+  if (copy.duration == null) copy.duration = DEFAULT_TOAST_DURATION;
 
-  if (copy.duration == null) {
-    copy.duration = DEFAULT_TOAST_DURATION;
-  }
-
-  return _toastManager.add(copy);
-} 
+  // Remove `duration` before passing to the underlying manager which doesn't accept it.
+  // Use `as any` for the narrowed call to match the expected parameter shape.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { duration, ...rest } = copy as any;
+  return _toastManager.add(rest as Parameters<typeof _toastManager.add>[0]);
+}
 
 // Proxy the manager so existing `toast.*` usages still work, but `add` uses default duration.
 type ToastManagerWithDefault = Omit<typeof _toastManager, 'add'> & {

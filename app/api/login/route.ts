@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { v7 as uuidv7 } from "uuid";
+import bcrypt from "bcryptjs";
+
 import { prisma } from "@/app/lib/prisma";
 import { sendVerificationOTP } from "@/app/lib/mailer";
 import {
@@ -7,75 +10,69 @@ import {
   getOTPExpiration,
   getOTPResendCooldown
 } from "@/app/lib/otp";
-import { v7 as uuidv7 } from "uuid";
-import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const email = body.email?.trim().toLowerCase();
+    const login = body.login?.trim().toLowerCase();   // Bisa berupa Username / Email
     const password = body.password;
-    const confirmPassword = body.confirmPassword;
 
-    // VALIDASI
+    // VALIDASI 
 
-    if (!email || !password || !confirmPassword) {
+    if (!login || !password) {
       return NextResponse.json(
         {
           success: false,
-          message: "Semua field wajib diisi.",
+          message: "Email/username dan password wajib diisi.",
         },
         { status: 400 }
       );
     };
 
-    if (password !== confirmPassword) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Konfirmasi password tidak cocok.",
-        },
-        { status: 400 }
-      );
-    };
+    // CARI USER
 
-    if (password.length < 8) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Password minimal 8 karakter.",
-        },
-        { status: 400 }
-      );
-    };
-
-    // CEK USER
-
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: login },
+          { username: login },
+        ],
+      },
     });
 
-    if (user) {
+    if (!user?.password) {
       return NextResponse.json(
         {
           success: false,
-          message: "Email sudah terdaftar."
+          message: "Email/username atau password salah.",
         },
-        { status: 409 }
+        { status: 401 }
       );
     };
 
-    // CEK PRA REGISTER
+    // CEK PASSWORD
 
-    const praRegister = await prisma.praRegister.findUnique({
-      where: { email, }
-    }); 
+    const isValidPassword = await bcrypt.compare(password, user.password);
 
-    // CEK COOLDOWN
+    if (!isValidPassword) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Email/username atau password salah.",
+        },
+        { status: 401 }
+      );
+    };
+
+    // CEK COOLDOWN OTP
+
+    const praLogin = await prisma.praLogin.findUnique({
+      where: { user_id: user.id }
+    });
 
     const remaining = getOTPResendCooldown(
-      praRegister?.last_otp_sent_at
+      praLogin?.last_otp_sent_at
     );
 
     if (remaining > 0) {
@@ -83,6 +80,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: `Silakan tunggu ${remaining} detik sebelum meminta OTP lagi.`,
+          remainingSeconds: remaining,
         },
         { status: 429 }
       );
@@ -92,48 +90,46 @@ export async function POST(request: NextRequest) {
 
     const otp = generateOTP();
     const otpHash = await hashOTP(otp);
-    const passwordHash = await bcrypt.hash(password, 12);
-    const otpExpiredAt = getOTPExpiration();
+    const expiresAt = getOTPExpiration();
 
-    // BUAT PENDING RESIGRATION BARU
+    // SIMPAN OTP LOGIN
 
     const now = new Date();
 
-    await prisma.praRegister.upsert({
-      where: { email },
+    await prisma.praLogin.upsert({
+      where: { user_id: user.id },
 
       update: {
-        password: passwordHash,
         otp: otpHash,
         otp_attempts: 0,
         last_otp_sent_at: now,
-        expires_at: otpExpiredAt,
+        expires_at: expiresAt,
       },
 
       create: {
         id: uuidv7(),
-        email,
-        password: passwordHash,
+        user_id: user.id,
         otp: otpHash,
         otp_attempts: 0,
         last_otp_sent_at: now,
-        expires_at: otpExpiredAt,
+        expires_at: expiresAt,
       },
     });
 
-    // Kirim OTP
+    // KIRIM OTP
 
-    await sendVerificationOTP(email, otp);
+    await sendVerificationOTP(user.email, otp);
 
     // RESPONSE
 
     return NextResponse.json({
       success: true,
-      message: "Kode OTP telah dikirm ke email anda.",
+      message: "Kode OTP telah dikirim ke email Anda.",
+      expiresIn: 300,
     });
 
   } catch (error) {
-    console.error("Registrasi Error:", error);
+    console.error("Login error:", error);
 
     return NextResponse.json(
       {
@@ -142,5 +138,5 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
-  };
+  }
 }

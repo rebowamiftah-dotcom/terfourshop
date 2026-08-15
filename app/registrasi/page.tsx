@@ -55,10 +55,11 @@ export default function RegistrasiPage() {
       description: "Selamat datang! Anda akan diarahkan ke toko.",
     });
 
-    const timer = setTimeout( () => router.push("/shopping") , 5000);
+    const timer = setTimeout(() => {
+      router.replace("/shopping");
+    }, 5000);
 
     return () => clearTimeout(timer);
-
   }, [searchParams, router]);
 
   // Login Google

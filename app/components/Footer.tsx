@@ -67,14 +67,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/registrasi" className="hover:text-purple-300 transition-colors">
+                <Link href="/member" className="hover:text-purple-300 transition-colors">
                   Gabung Member
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* 3. BANTUAN & LAYANAN (TERHUBUNG RUTE /bantuan/...) */}
+          {/* 3. BANTUAN & LAYANAN */}
           <div>
             <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 border-l-2 border-pink-400 pl-2.5">
               Bantuan

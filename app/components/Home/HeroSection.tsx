@@ -3,9 +3,18 @@
 import { motion, Variants } from "framer-motion";
 import Link from "next/link";
 import Background from "../Background/Background";
-import CountUp from "../CountUp"; // Impor komponen CountUp (sesuaikan path foldernya)
+import CountUp from "../CountUp"; 
+
+import { useLanguage } from "../Contexts/LanguageContext"; // Sesuaikan path ini jika berbeda
+import { getLangKey } from "@/app/lib/language";
+import { dictionary } from "@/app/_dictionaries/HeroSection";
 
 export default function HeroSection() {
+  const { language } = useLanguage();
+
+  // Pilih teks sesuai bahasa aktif (default ke 'id')
+  const text = dictionary[getLangKey(language)];
+
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -45,39 +54,39 @@ export default function HeroSection() {
         <motion.div variants={itemVariants}>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-6 text-xs sm:text-sm text-purple-300 animate-pulse">
             <span className="w-2 h-2 rounded-full bg-purple-400" />
-            Next-Gen Shopping Experience
+            {text.badge}
           </div>
         </motion.div>
 
-       {/* Headline Utama */}
+        {/* Headline Utama */}
         <motion.h1 
-           variants={itemVariants} 
-           className="max-w-4xl text-2xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.15] mb-4">
-           Masa Depan <span className="whitespace-nowrap">E-Commerce</span> <br className="hidden sm:inline" />
-           <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300">
-           Bersama TerfourShop 
+          variants={itemVariants} 
+          className="max-w-4xl text-2xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.15] mb-4"
+        >
+          {text.headlinePrefix} <span className="whitespace-nowrap">E-Commerce</span> <br className="hidden sm:inline" />
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300">
+            {text.headlineSuffix}
           </span>
         </motion.h1>
 
         {/* Sub-headline */}
         <motion.p variants={itemVariants} className="max-w-xl text-sm sm:text-base text-slate-300 mb-8 leading-relaxed font-light">
-          Jelajahi produk eksklusif dengan pengalaman interaktif imersif. 
-          Belanja lebih cepat, interaktif, dan futuristik langsung dari browser Anda.
+          {text.subheadline}
         </motion.p>
 
         {/* Call to Action Buttons */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 w-full justify-center max-w-sm sm:max-w-md">
           <Link
-            href="/shop"
+            href="/shopping"
             className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-purple-500/25 transition-all duration-300 hover:scale-105 text-center text-sm sm:text-base"
           >
-            Jelajahi Toko
+            {text.btnShop}
           </Link>
           <Link
             href="/about"
             className="px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold border border-white/10 backdrop-blur-md transition-all duration-300 hover:scale-105 text-center text-sm sm:text-base"
           >
-            Tentang Kami
+            {text.btnAbout}
           </Link>
         </motion.div>
 
@@ -87,19 +96,19 @@ export default function HeroSection() {
             <p className="text-xl sm:text-2xl font-bold text-white">
               <CountUp from={0} to={10} duration={2} />K+
             </p>
-            <p className="text-xs text-slate-400">Produk Digital & Fisik</p>
+            <p className="text-xs text-slate-400">{text.statsProduct}</p>
           </div>
           <div>
             <p className="text-xl sm:text-2xl font-bold text-white">
               <CountUp from={0} to={99.9} duration={2} />%
             </p>
-            <p className="text-xs text-slate-400">Kepuasan Pelanggan</p>
+            <p className="text-xs text-slate-400">{text.statsSatisfaction}</p>
           </div>
           <div className="col-span-2 sm:col-span-1">
             <p className="text-xl sm:text-2xl font-bold text-white">
-             <CountUp from={0.00} to={0.02} duration={5} />s
+              <CountUp from={0.00} to={0.02} duration={5} />s
             </p>
-            <p className="text-xs text-slate-400">Render Latency</p>
+            <p className="text-xs text-slate-400">{text.statsLatency}</p>
           </div>
         </motion.div>
       </motion.div>
