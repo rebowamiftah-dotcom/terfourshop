@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/app/lib/prisma";
-import { sendVerificationOTP } from "@/app/lib/mailer";
-import { generateOTP, getOTPExpiration, getOTPResendCooldown, hashOTP } from "@/app/lib/otp";
+import { prisma } from "@/lib/prisma";
+import { sendVerificationOTP } from "@/lib/mailer";
+import { generateOTP, getOTPExpiration, getOTPResendCooldown, hashOTP } from "@/lib/otp";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const email = body.email?.trim().toLowerCase();
+    const cleanEmail = body?.email?.trim().toLowerCase();
 
     // VALIDASI EMAIL
 
-    if (!email) {
+    if (!cleanEmail) {
       return NextResponse.json(
         {
           success: false,
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // CARI PRA REGISTER
 
     const praRegister = await prisma.praRegister.findUnique({
-      where: { email }
+      where: { email: cleanEmail }
     });
 
     if (!praRegister) {
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     const now = new Date();
 
     await prisma.praRegister.update({
-      where: { email },
+      where: { email: cleanEmail },
 
       data: {
         otp: hashedOTP,
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
 
     // KIRIM EMAIL
 
-    await sendVerificationOTP(email, otp);
+    await sendVerificationOTP(cleanEmail, otp);
 
     // RESPONSE
 

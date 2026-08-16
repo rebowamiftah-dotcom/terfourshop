@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/app/lib/prisma";
-import { getOTPExpired, verifyOTP } from "@/app/lib/otp";
-import { isExpired } from "@/app/lib/utils";
+import { prisma } from "@/lib/prisma";
+import { getOTPExpired, verifyOTP } from "@/lib/otp";
 import {
   generateLoginToken,
   hashLoginToken,
   getLoginTokenExpiration,
-} from "@/app/lib/loginToken";
+} from "@/lib/loginToken";
 
 const MAX_OTP_ATTEMPTS = 5;
 
@@ -63,8 +62,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Data login tidak ditemukan. Silakan login kembali.",
+          message: "Data login tidak ditemukan. Silakan login kembali.",
         },
         { status: 404 }
       );
@@ -76,8 +74,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Kode OTP sudah kedaluwarsa. Silakan meminta OTP baru.",
+          message: "Kode OTP sudah kedaluwarsa. Silakan meminta OTP baru.",
         },
         { status: 400 }
       );
@@ -89,17 +86,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Batas percobaan OTP telah tercapai. Silakan meminta OTP baru.",
+          message: "Batas percobaan OTP telah tercapai. Silakan meminta OTP baru.",
         },
         { status: 429 }
       );
     };
 
-
-    // =========================
     // VERIFIKASI OTP
-    // =========================
 
     const isValidOTP = await verifyOTP(otp, praLogin.otp);
 

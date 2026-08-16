@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/app/lib/prisma";
-import { sendVerificationOTP } from "@/app/lib/mailer";
+import { prisma } from "@/lib/prisma";
+import { sendVerificationOTP } from "@/lib/mailer";
 import {
   generateOTP,
   hashOTP,
   getOTPExpiration,
   getOTPResendCooldown,
-} from "@/app/lib/otp";
+} from "@/lib/otp";
 
 export async function POST(request: NextRequest) {
   try {

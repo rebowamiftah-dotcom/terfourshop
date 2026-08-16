@@ -36,7 +36,8 @@ export async function proxy(request: NextRequest) {
     if (role !== "SELLER") {
       return new NextResponse("Not Found", {
         status: 404
-      });    };
+      });
+    };
   };
 
   // CUSTOMER

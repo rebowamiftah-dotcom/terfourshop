@@ -1,4 +1,4 @@
-import { LanguageKey } from "@/app/lib/language";
+import { LanguageKey } from "@/lib/language";
 
 export const dictionary: Record<LanguageKey, {
   badge: string;

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion, Variants } from 'framer-motion';
-import CardProfileList from '../components/About/CardProfileList';
+import CardProfileList from '@/components/About/CardProfileList';
 
 // --- KONFIGURASI ANIMASI ---
 const fadeInUp: Variants = {

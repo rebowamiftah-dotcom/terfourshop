@@ -429,8 +429,8 @@ model Store {
 model PraRegister {
   id               String    @id @db.Char(36)
   email            String    @unique @db.VarChar(255)
-  password         String    @db.VarChar(255)
-  otp              String    @db.VarChar(6)
+  password         String    @db.VarChar(60)
+  otp              String    @db.VarChar(60)
   otp_attempts     Int       @default(0) @db.UnsignedTinyInt
   last_otp_sent_at DateTime? @db.Timestamp(0)
   expires_at       DateTime  @db.Timestamp(0)
@@ -445,7 +445,7 @@ model PraLogin {
   user_id                String    @unique @db.Char(36)
 
   // Waktu OTP Berakhir
-  otp                    String    @db.VarChar(6) 
+  otp                    String    @db.VarChar(60) 
   otp_attempts           Int       @default(0)
   last_otp_sent_at       DateTime?
   expires_at             DateTime
@@ -479,7 +479,7 @@ model User {
   id         String    @id @db.Char(36)
   username   String    @unique(map: "username") @db.VarChar(50)
   email      String    @unique(map: "email") @db.VarChar(255)
-  password   String?   @db.VarChar(255)
+  password   String?   @db.VarChar(60)
   phone      String?   @unique(map: "phone") @db.VarChar(14)
   role_id    String    @db.Char(36)
   created_at DateTime  @default(now()) @db.Timestamp(0)

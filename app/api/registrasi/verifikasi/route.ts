@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/app/lib/prisma";
-import { generateUsername } from "@/app/lib/utils";
-import { getOTPExpired, verifyOTP } from "@/app/lib/otp";
+import { prisma } from "@/lib/prisma";
+import { generateUsername } from "@/lib/utils";
+import { getOTPExpired, verifyOTP } from "@/lib/otp";
+import { verifyOTPSchema } from "@/lib/validations/auth";
 import { v7 as uuidv7 } from "uuid";
 
 const MAX_OTP_ATTEMPTS = 5;
@@ -10,35 +11,31 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const email = body.email?.trim().toLowerCase();
-    const otp = body.otp?.trim();
-
     // VALIDASI
 
-    if (!email || !otp) {
+    const validationResult = verifyOTPSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0]?.message ?? "Input tidak valid.";
+
       return NextResponse.json(
         {
           success: false,
-          message: "Email dan OTP wajib diisi.",
+          message: firstError,
+          errors: validationResult.error.flatten().fieldErrors,
         },
-        { status: 400 },
+        { status: 400 }
       );
     };
 
-    if (!/^\d{6}$/.test(otp)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Kode OTP harus terdiri dari 6 digit.",
-        },
-        { status: 400 },
-      );
-    };
+    const { email, otp } = validationResult.data;
+    const cleanEmail = email.toLowerCase();
+    const cleanOtp = otp.trim();
 
-    // CARI PENDING REGISTRATION
+    // CARI PRA REGISTER
 
     const praRegister = await prisma.praRegister.findUnique({
-      where: { email, },
+      where: { email: cleanEmail },
     });
 
     if (!praRegister) {
@@ -59,7 +56,7 @@ export async function POST(request: NextRequest) {
           success: false,
           message: "Kode OTP sudah kedaluwarsa.",
         },
-        { status: 400 },
+        { status: 400 }
       );
     };
 
@@ -69,23 +66,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Batas percobaan OTP telah tercapai. Silakan meminta OTP baru.",
+          message:
+            "Batas percobaan OTP telah tercapai. Silakan meminta OTP baru.",
         },
         { status: 429 }
       );
     };
 
-    // OTP SALAH
-
-    const isValidOTP = await verifyOTP(otp, praRegister.otp);
+    // VERIFIKASI OTP HASH
+    const isValidOTP = await verifyOTP(cleanOtp, praRegister.otp);
 
     if (!isValidOTP) {
       const newAttempts = praRegister.otp_attempts + 1;
 
       await prisma.praRegister.update({
-        where: { email },
+        where: { email: cleanEmail },
         data: { otp_attempts: newAttempts },
-      }); 
+      });
 
       const remainingAttempts = MAX_OTP_ATTEMPTS - newAttempts;
 
@@ -101,46 +98,32 @@ export async function POST(request: NextRequest) {
       );
     };
 
-    // OTP BENAR
+    // GENERATE USERNAME UNIK
+    let username = generateUsername(cleanEmail);
 
-    // GENERATE USERNAME
+    while (await prisma.user.findUnique({ where: { username } })) {
+      username = generateUsername(cleanEmail);
+    }
 
-    let username = generateUsername(email);
-
-    while (
-      await prisma.user.findUnique({
-        where: { username },
-      })
-    ) {
-      username = generateUsername(email);
-    };
-
-    // TRANSACTION
-
+    // PRISMA TRANSACTION (CREATE USER & PROFILES, DELETE PRA_REGISTER)
     const user = await prisma.$transaction(async (tx) => {
-      // CARI ROLE CUSTOMER
-
       const customerRole = await tx.role.findUnique({
-        where: { name: "CUSTOMER", },
+        where: { name: "CUSTOMER" },
       });
 
       if (!customerRole) {
         throw new Error("Role CUSTOMER tidak ditemukan.");
-      };
-
-      // BUAT USER
+      }
 
       const newUser = await tx.user.create({
         data: {
           id: uuidv7(),
           username,
-          email,
+          email: cleanEmail,
           password: praRegister.password,
           role_id: customerRole.id,
         },
       });
-
-      // BUAT PROFILE
 
       await tx.profile.create({
         data: {
@@ -149,16 +132,12 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // BUAT CART
-
       await tx.cart.create({
         data: {
           id: uuidv7(),
           user_id: newUser.id,
         },
       });
-
-      // BUAT ADDRESS
 
       await tx.address.create({
         data: {
@@ -167,17 +146,14 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // HAPUS PENDING REGISTRATION
-
       await tx.praRegister.delete({
-        where: { email }
+        where: { email: cleanEmail },
       });
 
       return newUser;
     });
 
-    // BERHASIL
-
+    // RESPONSE SUKSES
     return NextResponse.json({
       success: true,
       message: "Registrasi berhasil. Silakan login.",

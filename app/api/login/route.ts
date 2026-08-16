@@ -2,25 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { v7 as uuidv7 } from "uuid";
 import bcrypt from "bcryptjs";
 
-import { prisma } from "@/app/lib/prisma";
-import { sendVerificationOTP } from "@/app/lib/mailer";
+import { prisma } from "@/lib/prisma";
+import { sendVerificationOTP } from "@/lib/mailer";
 import {
   generateOTP,
   hashOTP,
   getOTPExpiration,
   getOTPResendCooldown
-} from "@/app/lib/otp";
+} from "@/lib/otp";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const login = body.login?.trim().toLowerCase();   // Bisa berupa Username / Email
-    const password = body.password;
-
+    const { identity = "", password = "" } = body;
+    
     // VALIDASI 
 
-    if (!login || !password) {
+    const cleanIdentity = identity.trim().toLowerCase();   // Bisa berupa Username / Email
+    const cleanPassword = password.trim();
+
+    if (!cleanIdentity || !cleanPassword) {
       return NextResponse.json(
         {
           success: false,
@@ -35,8 +37,8 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findFirst({
       where: {
         OR: [
-          { email: login },
-          { username: login },
+          { email: cleanIdentity },
+          { username: cleanIdentity },
         ],
       },
     });
@@ -53,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // CEK PASSWORD
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(cleanPassword, user.password);
 
     if (!isValidPassword) {
       return NextResponse.json(

@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Footer from "../components/Footer";
-import { OpenEyesIcon, CloseEyesIcon } from "../components/Icon";
+import Footer from "@/components/Footer";
+import { OpenEyesIcon, CloseEyesIcon } from "@/components/Icon";
 
 export default function GabungMemberPage() {
   const router = useRouter();

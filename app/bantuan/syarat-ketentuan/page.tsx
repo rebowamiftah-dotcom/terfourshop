@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import Footer from "@/app/components/Footer";
+import Footer from "@/components/Footer";
 
 export default function SyaratKetentuanPage() {
   return (
