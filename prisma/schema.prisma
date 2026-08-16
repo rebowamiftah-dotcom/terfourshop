@@ -8,16 +8,17 @@ datasource db {
 }
 
 model Address {
-  id             String  @id @db.Char(36)
-  user_id        String  @db.Char(36)
-  recipient_name String  @db.VarChar(50)
-  phone          String  @db.VarChar(13)
-  address        String  @db.Text
-  city           String  @db.VarChar(100)
-  province       String  @db.VarChar(100)
-  postal_code    String  @db.VarChar(10)
-  is_default     Boolean @default(false)
-  users          User    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_addresses_user")
+  id             String   @id @db.Char(36)
+  user_id        String   @unique @db.Char(36)
+  recipient_name String?  @db.VarChar(50)
+  phone          String?  @db.VarChar(14)
+  address        String?  @db.Text
+  city           String?  @db.VarChar(100)
+  province       String?  @db.VarChar(100)
+  postal_code    String?  @db.VarChar(10)
+  created_at     DateTime @default(now()) @db.Timestamp(0)
+  updated_at     DateTime @updatedAt @db.Timestamp(0)
+  users          User     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_addresses_user")
   orders         Order[]
 
   @@index([user_id], map: "fk_addresses_user")
@@ -31,24 +32,27 @@ model BusinessType {
   description       String?          @db.VarChar(255)
   is_active         Boolean          @default(true)
   created_at        DateTime         @default(now()) @db.Timestamp(0)
-  updated_at        DateTime         @default(now()) @db.Timestamp(0)
+  updated_at        DateTime         @updatedAt @db.Timestamp(0)
   seller_businesses SellerBusiness[]
 
   @@map("business_types")
 }
 
 model CartItem {
-  id         String   @id @db.Char(36)
-  cart_id    String   @db.Char(36)
-  product_id String   @db.Char(36)
-  quantity   Int      @default(1) @db.UnsignedInt
-  created_at DateTime @default(now()) @db.Timestamp(0)
-  updated_at DateTime @default(now()) @db.Timestamp(0)
-  carts      Cart     @relation(fields: [cart_id], references: [id], onDelete: Cascade, map: "fk_cart_items_cart")
-  products   Product  @relation(fields: [product_id], references: [id], map: "fk_cart_items_product")
+  id         String          @id @db.Char(36)
+  cart_id    String          @db.Char(36)
+  product_id String          @db.Char(36)
+  variant_id String?         @db.Char(36)
+  quantity   Int             @default(1) @db.UnsignedInt
+  created_at DateTime        @default(now()) @db.Timestamp(0)
+  updated_at DateTime        @updatedAt @db.Timestamp(0)
+  carts      Cart            @relation(fields: [cart_id], references: [id], onDelete: Cascade, map: "fk_cart_items_cart")
+  products   Product         @relation(fields: [product_id], references: [id], map: "fk_cart_items_product")
+  variants   ProductVariant? @relation(fields: [variant_id], references: [id])
 
-  @@unique([cart_id, product_id], map: "unique_cart_product")
+  @@unique([cart_id, product_id, variant_id], map: "unique_cart_product")
   @@index([product_id], map: "fk_cart_items_product")
+  @@index([variant_id], map: "fk_cart_items_variants")
   @@map("cart_items")
 }
 
@@ -56,7 +60,7 @@ model Cart {
   id         String     @id @db.Char(36)
   user_id    String     @unique(map: "user_id") @db.Char(36)
   created_at DateTime   @default(now()) @db.Timestamp(0)
-  updated_at DateTime   @default(now()) @db.Timestamp(0)
+  updated_at DateTime   @updatedAt @db.Timestamp(0)
   cart_items CartItem[]
   users      User       @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_carts_user")
 
@@ -69,7 +73,7 @@ model Category {
   slug               String            @unique(map: "slug") @db.VarChar(120)
   description        String?           @db.Text
   created_at         DateTime          @default(now()) @db.Timestamp(0)
-  updated_at         DateTime          @default(now()) @db.Timestamp(0)
+  updated_at         DateTime          @updatedAt @db.Timestamp(0)
   product_categories ProductCategory[]
 
   @@map("categories")
@@ -81,7 +85,7 @@ model Courier {
   name       String     @unique(map: "name") @db.VarChar(100)
   is_active  Boolean    @default(true)
   created_at DateTime   @default(now()) @db.Timestamp(0)
-  updated_at DateTime   @default(now()) @db.Timestamp(0)
+  updated_at DateTime   @updatedAt @db.Timestamp(0)
   shipments  Shipment[]
 
   @@map("couriers")
@@ -109,13 +113,13 @@ model Order {
   id            String        @id @db.Char(36)
   user_id       String        @db.Char(36)
   address_id    String?       @db.Char(36)
-  order_number  String        @unique(map: "order_number") @db.VarChar(50)
+  order_number  String        @unique(map: "order_number") @db.Char(20)
   status        orders_status @default(PENDING)
   subtotal      Decimal       @default(1.00) @db.Decimal(15, 2)
   shipping_cost Decimal       @default(0.00) @db.Decimal(15, 2)
   total_amount  Decimal       @default(1.00) @db.Decimal(15, 2)
   created_at    DateTime      @default(now()) @db.Timestamp(0)
-  updated_at    DateTime      @default(now()) @db.Timestamp(0)
+  updated_at    DateTime      @updatedAt @db.Timestamp(0)
   addresses     Address?      @relation(fields: [address_id], references: [id], map: "fk_orders_address")
   users         User          @relation(fields: [user_id], references: [id], map: "fk_orders_user")
   payments      Payment?
@@ -133,7 +137,7 @@ model PaymentMethod {
   description String?   @db.VarChar(255)
   is_active   Boolean   @default(true)
   created_at  DateTime  @default(now()) @db.Timestamp(0)
-  updated_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime  @updatedAt @db.Timestamp(0)
   payments    Payment[]
 
   @@map("payment_methods")
@@ -147,7 +151,7 @@ model Payment {
   transaction_id    String?                 @unique(map: "transaction_id") @db.VarChar(150)
   paid_at           DateTime?               @db.Timestamp(0)
   created_at        DateTime                @default(now()) @db.Timestamp(0)
-  updated_at        DateTime                @default(now()) @db.Timestamp(0)
+  updated_at        DateTime                @updatedAt @db.Timestamp(0)
   payment_methods   PaymentMethod           @relation(fields: [payment_method_id], references: [id], map: "fk_payments_method")
   orders            Order                   @relation(fields: [order_id], references: [id], map: "fk_payments_order")
 
@@ -164,6 +168,59 @@ model ProductCategory {
   @@id([product_id, category_id])
   @@index([category_id], map: "fk_product_categories_category")
   @@map("product_categories")
+}
+
+model ProductOptionValue {
+  id              String                @id @db.Char(36)
+  option_id       String                @db.Char(36)
+  value           String                @db.VarChar(100)
+  sort_order      Int                   @default(0) @db.UnsignedSmallInt
+  variant_values  ProductVariantValue[]
+  product_options ProductOption         @relation(fields: [option_id], references: [id], onDelete: Cascade)
+
+  @@unique([option_id, value])
+  @@index([option_id])
+  @@map("product_option_values")
+}
+
+model ProductOption {
+  id            String               @id @db.Char(36)
+  product_id    String               @db.Char(36)
+  name          String               @db.VarChar(50)
+  sort_order    Int                  @default(0) @db.UnsignedSmallInt
+  option_values ProductOptionValue[]
+  products      Product              @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_id, name])
+  @@index([product_id])
+  @@map("product_options")
+}
+
+model ProductVariantValue {
+  variant_id       String             @db.Char(36)
+  option_value_id  String             @db.Char(36)
+  product_variants ProductVariant     @relation(fields: [variant_id], references: [id], onDelete: Cascade)
+  option_values    ProductOptionValue @relation(fields: [option_value_id], references: [id], onDelete: Cascade)
+
+  @@id([variant_id, option_value_id])
+  @@index([option_value_id])
+  @@map("product_variant_values")
+}
+
+model ProductVariant {
+  id             String                @id @db.Char(36)
+  product_id     String                @db.Char(36)
+  sku            String                @unique @db.VarChar(100)
+  price          Decimal               @db.Decimal(15, 2)
+  stock          Int                   @default(0) @db.UnsignedInt
+  created_at     DateTime              @default(now()) @db.Timestamp(0)
+  updated_at     DateTime              @updatedAt @db.Timestamp(0)
+  variant_values ProductVariantValue[]
+  products       Product               @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  cartItems      CartItem[]
+
+  @@index([product_id])
+  @@map("product_variants")
 }
 
 model ProductImage {
@@ -190,11 +247,13 @@ model Product {
   stock              Int               @default(0) @db.UnsignedInt
   status             products_status   @default(DRAFT)
   created_at         DateTime          @default(now()) @db.Timestamp(0)
-  updated_at         DateTime          @default(now()) @db.Timestamp(0)
+  updated_at         DateTime          @updatedAt @db.Timestamp(0)
   cart_items         CartItem[]
   order_items        OrderItem[]
   product_categories ProductCategory[]
   product_images     ProductImage[]
+  product_options    ProductOption[]
+  product_variants   ProductVariant[]
   stores             Store             @relation(fields: [store_id], references: [id], onDelete: Cascade, map: "fk_products_store")
 
   @@index([store_id], map: "fk_products_store")
@@ -202,15 +261,16 @@ model Product {
 }
 
 model Profile {
-  id         String           @id @db.Char(36)
-  user_id    String           @unique(map: "user_id") @db.Char(36)
-  full_name  String?          @db.VarChar(60)
-  avatar     String?          @db.VarChar(500)
-  gender     profiles_gender  @default(UNKNOWN)
-  birth_date DateTime?        @db.Date
-  created_at DateTime         @default(now()) @db.Timestamp(0)
-  updated_at DateTime         @default(now()) @db.Timestamp(0)
-  users      User             @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_profiles_user")
+  id         String          @id @db.Char(36)
+  user_id    String          @unique(map: "user_id") @db.Char(36)
+  nik        String?         @unique @db.Char(16)
+  full_name  String?         @db.VarChar(60)
+  avatar     String?         @db.VarChar(500)
+  gender     profiles_gender @default(UNKNOWN)
+  birth_date DateTime?       @db.Date
+  created_at DateTime        @default(now()) @db.Timestamp(0)
+  updated_at DateTime        @updatedAt @db.Timestamp(0)
+  users      User            @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_profiles_user")
 
   @@map("profiles")
 }
@@ -219,10 +279,10 @@ model Review {
   id            String    @id @db.Char(36)
   user_id       String    @db.Char(36)
   order_item_id String    @unique(map: "unique_reviews_order_item") @db.Char(36)
-  rating        Int       @db.UnsignedTinyInt
+  rating        Decimal   @db.Decimal(2, 1)
   comment       String?   @db.Text
   created_at    DateTime  @default(now()) @db.Timestamp(0)
-  updated_at    DateTime  @default(now()) @db.Timestamp(0)
+  updated_at    DateTime  @updatedAt @db.Timestamp(0)
   order_items   OrderItem @relation(fields: [order_item_id], references: [id], map: "fk_reviews_order_item")
   users         User      @relation(fields: [user_id], references: [id], map: "fk_reviews_user")
 
@@ -249,7 +309,7 @@ model SellerBusiness {
   tax_number                   String?      @db.Char(16)
   business_registration_number String?      @db.Char(13)
   created_at                   DateTime     @default(now()) @db.Timestamp(0)
-  updated_at                   DateTime     @default(now()) @db.Timestamp(0)
+  updated_at                   DateTime     @updatedAt @db.Timestamp(0)
   sellers                      Seller       @relation(fields: [seller_id], references: [id], onDelete: Cascade, map: "fk_seller_businesses_seller")
   business_types               BusinessType @relation(fields: [business_type_id], references: [id], map: "fk_seller_businesses_type")
 
@@ -266,7 +326,7 @@ model SellerDocument {
   verification_status seller_documents_verification_status @default(PENDING)
   verified_at         DateTime?                            @db.Timestamp(0)
   created_at          DateTime                             @default(now()) @db.Timestamp(0)
-  updated_at          DateTime                             @default(now()) @db.Timestamp(0)
+  updated_at          DateTime                             @updatedAt @db.Timestamp(0)
   sellers             Seller                               @relation(fields: [seller_id], references: [id], onDelete: Cascade, map: "fk_seller_documents_seller")
 
   @@index([seller_id], map: "fk_seller_documents_seller")
@@ -278,13 +338,13 @@ model SellerOrder {
   id            String               @id @db.Char(36)
   order_id      String               @db.Char(36)
   store_id      String               @db.Char(36)
-  order_number  String               @unique(map: "order_number") @db.VarChar(70)
+  order_number  String               @unique(map: "order_number") @db.Char(25)
   status        seller_orders_status @default(PENDING)
   subtotal      Decimal              @default(1.00) @db.Decimal(15, 2)
   shipping_cost Decimal              @default(0.00) @db.Decimal(15, 2)
   total_amount  Decimal              @default(1.00) @db.Decimal(15, 2)
   created_at    DateTime             @default(now()) @db.Timestamp(0)
-  updated_at    DateTime             @default(now()) @db.Timestamp(0)
+  updated_at    DateTime             @updatedAt @db.Timestamp(0)
   order_items   OrderItem[]
   orders        Order                @relation(fields: [order_id], references: [id], map: "fk_seller_orders_order")
   stores        Store                @relation(fields: [store_id], references: [id], map: "fk_seller_orders_store")
@@ -302,7 +362,7 @@ model Seller {
   verification_status sellers_verification_status @default(PENDING)
   verified_at         DateTime?                   @db.Timestamp(0)
   created_at          DateTime                    @default(now()) @db.Timestamp(0)
-  updated_at          DateTime                    @default(now()) @db.Timestamp(0)
+  updated_at          DateTime                    @updatedAt @db.Timestamp(0)
   seller_businesses   SellerBusiness?
   seller_documents    SellerDocument[]
   users               User                        @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_sellers_user")
@@ -333,7 +393,7 @@ model Shipment {
   shipped_at      DateTime?        @db.Timestamp(0)
   delivered_at    DateTime?        @db.Timestamp(0)
   created_at      DateTime         @default(now()) @db.Timestamp(0)
-  updated_at      DateTime         @default(now()) @db.Timestamp(0)
+  updated_at      DateTime         @updatedAt @db.Timestamp(0)
   shipment_proofs ShipmentProof[]
   couriers        Courier          @relation(fields: [courier_id], references: [id], map: "fk_shipments_courier")
   seller_orders   SellerOrder      @relation(fields: [seller_order_id], references: [id], map: "fk_shipments_seller_order")
@@ -346,44 +406,59 @@ model Store {
   id            String        @id @db.Char(36)
   seller_id     String        @db.Char(36)
   name          String        @db.VarChar(150)
-  store_code    String        @unique(map: "store_code") @db.Char(3)
+  store_code    String        @db.VarChar(20)
   slug          String        @unique(map: "slug") @db.VarChar(180)
   description   String?       @db.Text
   logo          String?       @db.VarChar(500)
-  phone         String?       @db.VarChar(13)
+  phone         String?       @db.VarChar(14)
   address       String?       @db.Text
   city          String?       @db.VarChar(100)
   province      String?       @db.VarChar(100)
   postal_code   String?       @db.VarChar(10)
   created_at    DateTime      @default(now()) @db.Timestamp(0)
-  updated_at    DateTime      @default(now()) @db.Timestamp(0)
+  updated_at    DateTime      @updatedAt @db.Timestamp(0)
   products      Product[]
   seller_orders SellerOrder[]
   sellers       Seller        @relation(fields: [seller_id], references: [id], onDelete: Cascade, map: "fk_stores_seller")
 
+  @@unique([seller_id, store_code], map: "unique_store_seller_code")
   @@index([seller_id], map: "fk_stores_seller")
   @@map("stores")
 }
 
-model Account {
-  id                 String  @id @db.Char(36)
-  user_id            String  @db.Char(36)
-  type               String  @db.VarChar(50)
-  provider           String  @db.VarChar(50)
-  providerAccountId  String  @db.VarChar(255)
-  refresh_token      String? @db.Text
-  access_token       String? @db.Text
-  expires_at         Int?
-  token_type         String? @db.VarChar(50)
-  scope              String? @db.VarChar(255)
-  id_token           String? @db.Text
-  session_state      String? @db.VarChar(255)
+model PraRegister {
+  id               String    @id @db.Char(36)
+  email            String    @unique @db.VarChar(255)
+  password         String    @db.VarChar(60)
+  otp              String    @db.VarChar(60)
+  otp_attempts     Int       @default(0) @db.UnsignedTinyInt
+  last_otp_sent_at DateTime? @db.Timestamp(0)
+  expires_at       DateTime  @db.Timestamp(0)
+  created_at       DateTime  @default(now()) @db.Timestamp(0)
+  updated_at       DateTime  @updatedAt @db.Timestamp(0)
 
-  user               User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  @@map("pra_registrations")
+}
 
-  @@unique([provider, providerAccountId])
-  @@index([user_id])
-  @@map("accounts")
+model PraLogin {
+  id                     String    @id @db.Char(36)
+  user_id                String    @unique @db.Char(36)
+
+  // Waktu OTP Berakhir
+  otp                    String    @db.VarChar(60) 
+  otp_attempts           Int       @default(0)
+  last_otp_sent_at       DateTime?
+  expires_at             DateTime
+
+  // Token Login
+  login_token            String?   @unique @db.VarChar(255)
+  login_token_expires_at DateTime?
+
+  created_at             DateTime  @default(now()) @db.Timestamp(0)
+  updated_at             DateTime  @updatedAt @db.Timestamp(0)
+  user                   User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("pra_logins")
 }
 
 model Member {
@@ -391,11 +466,11 @@ model Member {
   user_id    String   @unique @db.Char(36)
   full_name  String   @db.VarChar(100)
   email      String   @unique @db.VarChar(255)
-  phone      String   @db.VarChar(20)
+  phone      String   @unique @db.Char(14)
   created_at DateTime @default(now()) @db.Timestamp(0)
-  updated_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @updatedAt @db.Timestamp(0)
 
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("members")
 }
@@ -404,19 +479,19 @@ model User {
   id         String    @id @db.Char(36)
   username   String    @unique(map: "username") @db.VarChar(50)
   email      String    @unique(map: "email") @db.VarChar(255)
-  password   String?   @db.VarChar(255)
-  phone      String?   @unique(map: "phone") @db.VarChar(13)
+  password   String?   @db.VarChar(60)
+  phone      String?   @unique(map: "phone") @db.VarChar(14)
   role_id    String    @db.Char(36)
   created_at DateTime  @default(now()) @db.Timestamp(0)
-  updated_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime  @updatedAt @db.Timestamp(0)
   members    Member?
-  accounts   Account[]
   addresses  Address[]
   carts      Cart?
   orders     Order[]
   profiles   Profile?
   reviews    Review[]
   sellers    Seller?
+  pralogin   PraLogin?
   roles      Role      @relation(fields: [role_id], references: [id], map: "fk_users_role")
 
   @@index([role_id], map: "fk_users_role")

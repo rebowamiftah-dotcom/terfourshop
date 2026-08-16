@@ -1,25 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm, FieldErrors, FieldError } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registrasiSchema, RegistrasiFormValues } from "@/lib/validations/auth";
 import { motion, Variants } from "framer-motion";
-
-import Link from "next/link";
-import { GoogleIcon } from "../components/Icon";
-import { toast } from "../components/UI/Toast";
 import clsx from "clsx";
+import Link from "next/link";
+import { toast } from "@/components/UI/Toast";
+import { CloseEyesIcon, OpenEyesIcon } from "@/components/Icon";
 
 export default function RegistrasiPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
+
+  // Inisialisasi React Hook Form
+  const { register, handleSubmit } = useForm<RegistrasiFormValues>({
+    resolver: zodResolver(registrasiSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
 
   const containerVariants: Variants = {
@@ -45,90 +51,63 @@ export default function RegistrasiPage() {
     },
   };
 
-  useEffect(() => {
-    const googleStatus = searchParams.get("google");
-
-    if (googleStatus !== "success") return;
-
-    toast.add({
-      title: "Login Google berhasil",
-      description: "Selamat datang! Anda akan diarahkan ke toko.",
-    });
-
-    const timer = setTimeout( () => router.push("/shopping") , 5000);
-
-    return () => clearTimeout(timer);
-
-  }, [searchParams, router]);
-
-  // Login Google
-  const handleGoogleSignIn = async () => {
-    if (isGoogleLoading || isLoading) return;
-
-    setIsGoogleLoading(true);
-
-    await signIn("google", {
-      callbackUrl: "/registrasi?google=success",
-    });
-  };
-
-  // Login Manual
-  const handleSubmit = async (
-    e: React.SubmitEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-
-    if (isGoogleLoading || isLoading) return;
+  // HANDLER REGISTRASI
+  const onSubmit = async (data: RegistrasiFormValues) => {
+    if (isLoading) return;
 
     try {
       setIsLoading(true);
-
-      // REGISTRASI
 
       const response = await fetch("/api/registrasi", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
       });
 
       const result = await response.json();
 
-      // REGISTER GAGAL
-
       if (!response.ok || !result.success) {
         toast.add({
           title: "Registrasi gagal",
-          description: result.message,
+          description: result.message ?? "Tidak dapat melakukan registrasi.",
         });
 
         return;
-      }
-
-      // SUCCESS
+      };
 
       toast.add({
         title: "Registrasi berhasil",
-        description: "Akun berhasil dibuat. Anda akan diarahkan ke Toko.",
+        description: "Kode verifikasi telah dikirim ke email Anda.",
       });
 
-      // Tunggu 3 detik
-      await new Promise( (resolve) => setTimeout(resolve, 5000) );
-
-      router.push("/login");
+      router.push(`/registrasi/verifikasi?email=${encodeURIComponent(data.email.trim().toLowerCase())}`);
 
     } catch (error) {
       console.error("Register error:", error);
 
       toast.add({
         title: "Terjadi kesalahan",
-        description: "Tidak dapat melakukan Registrasi. Silakan coba lagi.",
+        description: "Tidak dapat melakukan registrasi. Silakan coba lagi.",
       });
 
     } finally {
       setIsLoading(false);
-    }
+    };
+  };
+
+  // HANDLER REGISTRASI KETIKA VALIDASI GAGAL
+  const onError = (errors: FieldErrors<RegistrasiFormValues>) => {
+    // Ambil pesan error pertama yang ditemukan
+    const firstError = Object.values(errors)[0] as FieldError | undefined;
+
+    if (firstError) {
+      toast.add({
+        title: "Input Tidak Valid",
+        description: String(firstError),
+      });
+    };
   };
 
   return (
@@ -161,8 +140,8 @@ export default function RegistrasiPage() {
             </p>
           </div>
 
-          {/* FORM REGISTRASI MANUAL */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* FORM REGISTRASI: Pass `onError` sebagai parameter kedua */}
+          <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-xs font-semibold text-slate-300 mb-1.5">
@@ -170,15 +149,12 @@ export default function RegistrasiPage() {
               </label>
 
               <input
+                {...register("email")}
                 type="email"
-                id ="email"
-                name ="email"
+                id="email"
                 placeholder="nama@email.com"
-                maxLength={255}
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
-                required
+                disabled={isLoading}
               />
             </div>
 
@@ -188,17 +164,28 @@ export default function RegistrasiPage() {
                 Kata Sandi
               </label>
 
-              <input
-                type="password"
-                id ="password"
-                name ="password"
-                placeholder="••••••••"
-                maxLength={12}
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
-              />
+              <div className="relative">
+                <input
+                  {...register("password")}
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  placeholder="Masukkan minimal 8 karakter"
+                  className="w-full px-4 pr-12 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                  title={showPassword ? "Sembunyikan Password" : "Tampilkan Password"}
+                >
+                  {showPassword ? (
+                    <CloseEyesIcon className="w-4 h-4" />
+                  ) : (
+                    <OpenEyesIcon className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Konfirmasi Password */}
@@ -207,71 +194,58 @@ export default function RegistrasiPage() {
                 Konfirmasi Kata Sandi
               </label>
 
-              <input
-                type="password"
-                id ="confirmPassword"
-                name ="confirmPassword"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
-                required
-              />
+              <div className="relative">
+                <input
+                  {...register("confirmPassword")}
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  placeholder="Ulangi kata sandi"
+                  className="w-full px-4 pr-12 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                  title={showConfirmPassword ? "Sembunyikan Password" : "Tampilkan Password"}
+                >
+                  {showConfirmPassword ? (
+                    <CloseEyesIcon className="w-4 h-4" />
+                  ) : (
+                    <OpenEyesIcon className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
+              disabled={isLoading}
               className={clsx(
-                "w-full py-3 mt-2 text-white text-sm font-semibold rounded-xl",
+                "w-full py-3 mt-2 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2",
                 "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500",
                 "shadow-lg shadow-purple-500/25",
-                "hover:scale-[1.01] active:scale-[0.99] ",
+                "hover:scale-[1.01] active:scale-[0.99]",
                 "transition-all duration-300",
-                (isGoogleLoading || isLoading) ? "cursor-wait" : "cursor-pointer"
+                isLoading ? "cursor-wait opacity-80" : "cursor-pointer"
               )}
             >
-              {isLoading ? "Mendaftarkan..." : "Daftarkan Akun Baru"}
+              {isLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  Mendaftarkan...
+                </>
+              ) : (
+                "Daftarkan Akun Baru"
+              )}
             </button>
           </form>
-
-          {/* PEMBATAS */}
-          <div className="flex items-center my-6">
-            <div className="flex-grow border-t border-white/10" />
-            <span className="px-3 text-xs text-slate-500 uppercase tracking-widest font-mono">
-              atau via google
-            </span>
-            <div className="flex-grow border-t border-white/10" />
-          </div>
-
-          {/* TOMBOL REGISTER WITH GOOGLE */}
-          <motion.button
-            type="button"
-            variants={itemVariants}
-            onClick={handleGoogleSignIn}
-            disabled={isGoogleLoading || isLoading}
-            className={clsx(
-              "w-full py-3 px-4 text-sm text-white font-semibold rounded-xl shadow-md",
-              "bg-white/10 hover:bg-white/15 border border-white/15",
-              "flex items-center justify-center gap-3",
-              "transition-all duration-300",
-              "hover:scale-[1.01] active:scale-[0.99]",
-              (isGoogleLoading || isLoading) ? "cursor-wait" : "cursor-pointer"
-            )}
-          >
-            <GoogleIcon className="h-5 w-5" />
-            <span>
-              {isGoogleLoading ? "Mengalihkan ke Google..." : "Daftarkan dengan Google"}
-            </span>
-          </motion.button>
 
           {/* FOOTER CARD */}
           <div className="mt-6 pt-5 border-t border-white/10 text-center text-xs text-slate-400">
             Sudah memiliki akun?{" "}
-            <Link
-              href="/login"
-              className="font-semibold text-purple-300 hover:text-pink-400 transition-colors"
-            >
+            <Link href="/login" className="font-semibold text-purple-300 hover:text-pink-400 transition-colors">
               Masuk di sini
             </Link>
           </div>

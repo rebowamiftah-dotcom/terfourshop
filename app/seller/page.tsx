@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { motion, Variants } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import CountUp from "../components/CountUp"; // Sesuaikan path CountUp Anda
-import Footer from "../components/Footer";   // Sesuaikan path Footer Anda
+import CountUp from "@/components/CountUp"; // Sesuaikan path CountUp Anda
+import Footer from "@/components/Footer";   // Sesuaikan path Footer Anda
 
 // --- DATA BENEFIT SELLER ---
 const BENEFITS = [

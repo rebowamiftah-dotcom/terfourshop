@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import Footer from "../components/Footer";
+import Footer from "@/components/Footer";
 
 // --- DUMMY DATA KONTAK LANGSUNG (CUKUP 3 KONTAK) ---
 const DIRECT_CONTACTS = [

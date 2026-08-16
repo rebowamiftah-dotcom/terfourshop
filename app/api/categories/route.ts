@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/app/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
@@ -17,7 +17,7 @@ export async function GET() {
     });
 
     return NextResponse.json({ success: true, categories });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching categories:", error);
     return NextResponse.json(
       { success: false, message: "Gagal mengambil data kategori" },

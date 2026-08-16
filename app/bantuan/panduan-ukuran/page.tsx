@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Footer from "@/app/components/Footer";
+import Footer from "@/components/Footer";
 
 export default function PanduanUkuranPage() {
   const [activeTab, setActiveTab] = useState<"pakaian" | "sepatu">("pakaian");
