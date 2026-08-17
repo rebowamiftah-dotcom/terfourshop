@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+
 import { prisma } from "@/lib/prisma";
 import { getOTPExpired, verifyOTP } from "@/lib/otp";
+import { verifyOTPSchema } from "@/lib/validations/auth";
+
 import {
-  generateLoginToken,
-  hashLoginToken,
-  getLoginTokenExpiration,
-} from "@/lib/loginToken";
+  generateAuthToken,
+  hashAuthToken,
+  getAuthTokenExpiration,
+  isAuthTokenExpired
+} from "@/lib/authToken";
+
+import {
+  LOGIN_COOKIE,
+  LOGIN_VERIFICATION_MAX_AGE,
+} from "@/app/_lib/verifyLogin";
 
 const MAX_OTP_ATTEMPTS = 5;
 
@@ -13,58 +23,76 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const email = body.email?.trim().toLowerCase();
-    const otp = body.otp?.trim();
+    // VALIDASI OTP
 
-    // VALIDASI
+    const validationResult = verifyOTPSchema.safeParse({ otp: body.otp });
 
-    if (!email || !otp) {
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0]?.message ?? "Input tidak valid.";
+
       return NextResponse.json(
         {
           success: false,
-          message: "Email dan OTP wajib diisi.",
+          message: firstError,
+          errors: validationResult.error.flatten().fieldErrors,
         },
         { status: 400 }
       );
     };
 
-    if (!/^\d{6}$/.test(otp)) {
+    const cleanOtp = validationResult.data.otp.trim();
+
+    // AMBIL COOKIE LOGIN
+
+    const cookieStore = await cookies();
+
+    const token = cookieStore.get(LOGIN_COOKIE)?.value;
+
+    if (!token) {
       return NextResponse.json(
         {
           success: false,
-          message: "Kode OTP harus terdiri dari 6 digit.",
+          message: "Sesi verifikasi tidak ditemukan. Silakan melakukan login kembali.",
         },
-        { status: 400 }
+        { status: 401 }
       );
     };
 
-    // CARI USER
+    // HASH TOKEN
 
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
+    const tokenHash = hashAuthToken(token);
 
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Akun tidak ditemukan.",
-        },
-        { status: 404 }
-      );
-    };
+    // CARI PRA LOGIN
 
     const praLogin = await prisma.praLogin.findUnique({
-      where: { user_id: user.id }
+      where: { login_token: tokenHash },
+      include: {
+        user: {
+          include: { roles: true },
+        },
+      },
     });
 
     if (!praLogin) {
       return NextResponse.json(
         {
           success: false,
-          message: "Data login tidak ditemukan. Silakan login kembali.",
+          message:
+            "Sesi verifikasi tidak valid. Silakan melakukan login kembali.",
         },
-        { status: 404 }
+        { status: 401 }
+      );
+    };
+
+    // CEK TOKEN EXPIRED
+
+    if (isAuthTokenExpired(praLogin.login_token_expires_at)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Sesi verifikasi telah kedaluwarsa. Silakan melakukan login kembali.",
+        },
+        { status: 401 }
       );
     };
 
@@ -80,7 +108,7 @@ export async function POST(request: NextRequest) {
       );
     };
 
-    // CEK BATAS PERCOBAAN
+    // CEK ATTEMPTS
 
     if (praLogin.otp_attempts >= MAX_OTP_ATTEMPTS) {
       return NextResponse.json(
@@ -94,14 +122,14 @@ export async function POST(request: NextRequest) {
 
     // VERIFIKASI OTP
 
-    const isValidOTP = await verifyOTP(otp, praLogin.otp);
+    const isValidOTP = await verifyOTP(cleanOtp, praLogin.otp);
 
     if (!isValidOTP) {
       const newAttempts = praLogin.otp_attempts + 1;
 
       await prisma.praLogin.update({
-        where: { user_id: user.id },
-        data: { otp_attempts: newAttempts }
+        where: { user_id: praLogin.user_id},
+        data: { otp_attempts: newAttempts },
       });
 
       const remainingAttempts = MAX_OTP_ATTEMPTS - newAttempts;
@@ -112,47 +140,51 @@ export async function POST(request: NextRequest) {
           message:
             remainingAttempts > 0
               ? `Kode OTP tidak valid. Sisa percobaan: ${remainingAttempts}.`
-              : "Kode OTP tidak valid. Batas percobaan telah tercapai. Silakan meminta kode OTP baru.",
+              : "Kode OTP tidak valid. Batas percobaan telah tercapai. Silakan meminta OTP baru.",
         },
-        { status: 400 }
+        { status: remainingAttempts > 0 ? 400 : 429 }
       );
-    };
+    }
 
-    // OTP BENAR
+    // BUAT LOGIN TOKEN
 
-    // Generate token login sementara
-    const loginToken = generateLoginToken();
+    const verifiedLoginToken = generateAuthToken();
+    const verifiedLoginTokenHash = hashAuthToken(verifiedLoginToken);
+    const verifiedLoginTokenExpiresAt = getAuthTokenExpiration(LOGIN_VERIFICATION_MAX_AGE);
 
-    // Hash token untuk disimpan di database
-    const loginTokenHash = hashLoginToken(loginToken);
-
-    // Waktu expired token
-    const loginTokenExpiresAt = getLoginTokenExpiration();
-
-    // SIMPAN LOGIN TOKEN
+    // UPDATE PRA LOGIN
 
     await prisma.praLogin.update({
-      where: { user_id: user.id },
+      where: {
+        user_id: praLogin.user_id,
+      },
       data: {
-        login_token: loginTokenHash,
-        login_token_expires_at: loginTokenExpiresAt,
-        expires_at: new Date(0),   // OTP sudah berhasil digunakan
+        login_token: verifiedLoginTokenHash,
+        login_token_expires_at: verifiedLoginTokenExpiresAt,
+        expires_at: new Date(0),
         otp_attempts: 0,
       },
     });
 
-    // RESPONSE
+    // RESPONSE SUKSES
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "OTP berhasil diverifikasi.",
-      loginToken,
+      loginToken: verifiedLoginToken,
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
+        id: praLogin.user.id,
+        username: praLogin.user.username,
+        email: praLogin.user.email,
+        role: praLogin.user.roles.name,
       },
     });
+
+    // HAPUS COOKIE
+
+    response.cookies.delete(LOGIN_COOKIE);
+
+    return response;
 
   } catch (error) {
     console.error("Login OTP verification error:", error);
@@ -160,7 +192,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: "Terjadi kesalahan saat memverifikasi OTP.",
+        message: "Terjadi kesalahan saat memverifikasi OTP. Silakan coba lagi.",
       },
       { status: 500 }
     );

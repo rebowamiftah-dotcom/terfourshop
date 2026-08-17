@@ -5,15 +5,15 @@ import { prisma } from "@/lib/prisma";
 import { sendVerificationOTP } from "@/lib/mailer";
 
 import {
-  REGISTRASI_COOKIE,
-  REGISTRASI_VERIFICATION_MAX_AGE
-} from "@/lib/verifyRegistrasi";
+  LOGIN_COOKIE,
+  LOGIN_VERIFICATION_MAX_AGE,
+} from "@/app/_lib/verifyLogin";
 
 import {
   generateOTP,
+  hashOTP,
   getOTPExpiration,
   getOTPResendCooldown,
-  hashOTP,
 } from "@/lib/otp";
 
 import {
@@ -29,13 +29,13 @@ export async function POST() {
 
     const cookieStore = await cookies();
 
-    const token = cookieStore.get(REGISTRASI_COOKIE)?.value;
+    const token = cookieStore.get(LOGIN_COOKIE)?.value;
 
     if (!token) {
       return NextResponse.json(
         {
           success: false,
-          message: "Sesi verifikasi tidak ditemukan. Silakan melakukan registrasi kembali.",
+          message: "Sesi verifikasi tidak ditemukan. Silakan melakukan login kembali.",
         },
         { status: 401 }
       );
@@ -43,31 +43,32 @@ export async function POST() {
 
     // HASH TOKEN
 
-    const tokenHash =  hashAuthToken(token);
+    const tokenHash = hashAuthToken(token);
 
-    // CARI PRA REGISTER
+    // CARI PRA LOGIN
 
-    const praRegister = await prisma.praRegister.findFirst({
-      where: { registrasi_token: tokenHash }
+    const praLogin = await prisma.praLogin.findFirst({
+      where: { login_token: tokenHash },
+      include: { user: true },
     });
 
-    if (!praRegister) {
+    if (!praLogin) {
       return NextResponse.json(
         {
           success: false,
-          message: "Sesi verifikasi tidak valid. Silakan melakukan registrasi kembali.",
+          message: "Data login tidak ditemukan. Silakan melakukan login kembali.",
         },
-        { status: 401 }
+        { status: 404 }
       );
     };
 
     // CEK TOKEN EXPIRED
 
-    if (isAuthTokenExpired(praRegister.registrasi_token_expires_at)) {
+    if (isAuthTokenExpired(praLogin.login_token_expires_at)) {
       return NextResponse.json(
         {
           success: false,
-          message: "Sesi verifikasi telah kedaluwarsa. Silakan melakukan registrasi kembali.",
+          message: "Sesi verifikasi telah kedaluwarsa. Silakan melakukan login kembali.",
         },
         { status: 401 }
       );
@@ -75,13 +76,13 @@ export async function POST() {
 
     // CEK COOLDOWN
 
-    const remaining = getOTPResendCooldown(praRegister.last_otp_sent_at);
+    const remaining = getOTPResendCooldown(praLogin.last_otp_sent_at);
 
     if (remaining > 0) {
       return NextResponse.json(
         {
           success: false,
-          message: `Silakan tunggu ${remaining} detik antes meminta OTP baru.`,
+          message: `Silakan tunggu ${remaining} detik sebelum meminta OTP baru.`,
           remainingSeconds: remaining,
         },
         { status: 429 }
@@ -95,31 +96,31 @@ export async function POST() {
     const expiresAt = getOTPExpiration();
     const now = new Date();
 
-    // GENERATE TOKEN REGISTRASI BARU
+    // GENERATE TOKEN LOGIN VERIFIKASI BARU
 
-    const registrasiToken = generateAuthToken();
-    const registrasiTokenHash = hashAuthToken(registrasiToken);
-    const registrasiTokenExpiresAt = getAuthTokenExpiration(REGISTRASI_VERIFICATION_MAX_AGE);   // Menit
+    const loginToken = generateAuthToken();
+    const loginTokenHash = hashAuthToken(loginToken);
+    const loginTokenExpiresAt = getAuthTokenExpiration(LOGIN_VERIFICATION_MAX_AGE);
 
-    // UPDATE PRA REGISTER
+    // UPDATE PRA LOGIN
 
-    await prisma.praRegister.update({
-      where: { id: praRegister.id },
+    await prisma.praLogin.update({
+      where: { id: praLogin.id },
       data: {
         otp: hashedOTP,
         otp_attempts: 0,
         last_otp_sent_at: now,
         expires_at: expiresAt,
-        registrasi_token: registrasiTokenHash,
-        registrasi_token_expires_at: registrasiTokenExpiresAt,
+        login_token: loginTokenHash,
+        login_token_expires_at: loginTokenExpiresAt,
       },
     });
 
     // KIRIM OTP
 
-    await sendVerificationOTP( praRegister.email, otp);
+    await sendVerificationOTP(praLogin.user.email, otp);
 
-    // RESPONSE SUKSES
+    // RESPONSE
 
     const response = NextResponse.json({
       success: true,
@@ -128,20 +129,20 @@ export async function POST() {
       resendAvailableAt: now.getTime() + 60 * 1000,
     });
 
-    // PERBARUI COOKIE
+    // UPDATE COOKIE DENGAN TOKEN BARU
 
-    response.cookies.set(REGISTRASI_COOKIE, registrasiToken, {
+    response.cookies.set(LOGIN_COOKIE, loginToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: REGISTRASI_VERIFICATION_MAX_AGE * 60,
+      maxAge: LOGIN_VERIFICATION_MAX_AGE * 60,
       path: "/",
     });
 
     return response;
-  
+
   } catch (error) {
-    console.error("Resend OTP error:", error);
+    console.error("Login Resend OTP Error:", error);
 
     return NextResponse.json(
       {
