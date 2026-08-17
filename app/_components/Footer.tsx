@@ -23,26 +23,6 @@ export default function Footer() {
             <p className="text-xs font-light leading-relaxed text-slate-400">
               Interactive Cyber-Futuristic E-Commerce Platform. Menghadirkan produk unggulan dengan pengalaman visual 3D yang imersif dan terpercaya.
             </p>
-            <div className="flex items-center gap-3 pt-2">
-              <a
-                href="#"
-                className="w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-purple-600/30 border border-purple-500/20 flex items-center justify-center text-sm text-white transition-all duration-200 hover:scale-110 shadow-md shadow-purple-950/50"
-              >
-                🌐
-              </a>
-              <a
-                href="#"
-                className="w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-pink-600/30 border border-pink-500/20 flex items-center justify-center text-sm text-white transition-all duration-200 hover:scale-110 shadow-md shadow-pink-950/50"
-              >
-                📸
-              </a>
-              <a
-                href="#"
-                className="w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-cyan-600/30 border border-cyan-500/20 flex items-center justify-center text-sm text-white transition-all duration-200 hover:scale-110 shadow-md shadow-cyan-950/50"
-              >
-                💬
-              </a>
-            </div>
           </div>
 
           {/* 2. NAVIGASI CEPAT */}

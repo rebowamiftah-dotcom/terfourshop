@@ -61,7 +61,7 @@ export default function Navbar({ menus }: NavbarProps) {
   return (
     <nav className="flex items-center justify-between h-16 md:h-18 gap-4">
       {/* BAGIAN KIRI: Logo & Nama Toko */}
-      <RightSide title="TerfourShop" link="/" img="/jason.jpg" />
+      <RightSide title="TerfourShop" link="/" img="/logo.jpg" />
 
       {/* BAGIAN KANAN (DESKTOP) */}
       <div className="hidden tablet:flex items-center gap-6">

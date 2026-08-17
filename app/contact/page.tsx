@@ -3,9 +3,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import Footer from "@/components/Footer";
 
-// --- DUMMY DATA KONTAK LANGSUNG (CUKUP 3 KONTAK) ---
+// --- DUMMY DATA KONTAK LANGSUNG ---
 const DIRECT_CONTACTS = [
   {
     id: 1,
@@ -13,7 +12,6 @@ const DIRECT_CONTACTS = [
     detail: "+62 881-6120-414",
     actionText: "Chat WhatsApp",
     href: "https://wa.me/628816120414?text=Halo%20Admin%20TerfourShop,%20saya%20butuh%20bantuan",
-    icon: "💬",
     gradient: "from-emerald-500 to-teal-600",
     badge: "Online • 24 Jam",
     isExternal: true,
@@ -21,39 +19,42 @@ const DIRECT_CONTACTS = [
   {
     id: 2,
     title: "Email Support Resmi",
-    detail: "support@terfourshop.com",
+    detail: "supportterfourshop@gmail.com",
     actionText: "Kirim Email",
-    href: "mailto:support@terfourshop.id?subject=Kritik%20dan%20Saran%20TerfourShop",
-    icon: "✉️",
+    href: "mailto:supportterfourshop@gmail.com?subject=Kritik%20dan%20Saran%20TerfourShop",
     gradient: "from-pink-500 to-rose-600",
     badge: "Dibalas < 2 Jam",
     isExternal: false,
-  },
-  {
-    id: 3,
-    title: "Lokasi Kantor",
-    detail: "SMK Teratai Putih Global 4",
-    actionText: "Petunjuk Arah (Maps)",
-    href: "https://maps.google.com/?q=Bekasi",
-    icon: "📍",
-    gradient: "from-purple-600 to-indigo-600",
-    badge: "Kunjungan Resmi",
-    isExternal: true,
   },
 ];
 
 // --- SHORTCUT BANTUAN CEPAT (E-COMMERCE QUICK LINKS) ---
 const QUICK_HELP = [
-  { id: 1, title: "Lacak Pesanan", icon: "📦", desc: "Cek posisi paket Anda real-time", href: "/track-order" },
-  { id: 2, title: "Kebijakan Retur", icon: "🔄", desc: "Panduan pengembalian & Garansi", href: "/returns" },
-  { id: 3, title: "Pusat FAQ", icon: "❓", desc: "Jawaban instan masalah umum", href: "/faq" },
+  { 
+    id: 1, 
+    title: "Lacak Pesanan", 
+    desc: "Fitur sedang dalam tahap pengembangan", 
+    href: "#", 
+    comingSoon: true 
+  },
+  { 
+    id: 2, 
+    title: "Kebijakan Retur", 
+    desc: "Panduan pengembalian & Garansi", 
+    href: "contact/returns", 
+    comingSoon: false 
+  },
+  { 
+    id: 3, 
+    title: "Pusat FAQ", 
+    desc: "Jawaban instan masalah umum", 
+    href: "contact/faq", 
+    comingSoon: false 
+  },
 ];
 
 export default function Contact() {
   const router = useRouter();
-
-  // --- STATE STATUS LOGIN/REGISTER ---
-  const [isRegistered, setIsRegistered] = useState(false);
 
   // State Form Khusus E-Commerce (Kritik & Saran)
   const [formData, setFormData] = useState({
@@ -61,7 +62,7 @@ export default function Contact() {
     email: "",
     orderId: "",
     category: "Saran Pengembangan Web / Aplikasi",
-    customCategory: "", // State untuk input kustom jika memilih "Lainnya"
+    customCategory: "", 
     message: "",
   });
 
@@ -76,22 +77,17 @@ export default function Contact() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Logika Cek Pendaftaran: Jika belum terdaftar, arahkan ke /register
-    if (!isRegistered) {
-      router.push("/registrasi");
-      return;
-    }
-
     setIsSubmitting(true);
 
-    // Kategori akhir yang akan dikirim (jika "Lainnya", ambil dari customCategory)
     const finalCategory =
       formData.category === "Lainnya" ? formData.customCategory : formData.category;
 
-    // Simulasi pengiriman pesan
+    const subject = `Kritik & Saran TerfourShop: ${finalCategory}`;
+    const body = `Nama: ${formData.name}%0D%0AEmail: ${formData.email}%0D%0ANomor Pesanan: ${formData.orderId || "Tidak ada"}%0D%0AKategori: ${finalCategory}%0D%0A%0D%0APesan:%0D%0A${formData.message}`;
+    
+    window.location.href = `mailto:supportterfourshop@gmail.com?subject=${subject}&body=${body}`;
+
     setTimeout(() => {
-      console.log("Data terkirim:", { ...formData, category: finalCategory });
       setIsSubmitting(false);
       setSubmittedSuccess(true);
       setFormData({
@@ -144,15 +140,27 @@ export default function Contact() {
           {QUICK_HELP.map((item) => (
             <motion.div
               key={item.id}
-              whileHover={{ y: -4 }}
-              onClick={() => router.push(item.href)}
-              className="cursor-pointer p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-pink-500/40 hover:bg-white/10 transition-all flex items-center gap-4"
+              whileHover={item.comingSoon ? {} : { y: -4 }}
+              onClick={() => {
+                if (!item.comingSoon) {
+                  router.push(item.href);
+                }
+              }}
+              className={`p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-4 transition-all ${
+                item.comingSoon 
+                  ? "opacity-60 cursor-not-allowed" 
+                  : "cursor-pointer hover:border-pink-500/40 hover:bg-white/10"
+              }`}
             >
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-xl shrink-0">
-                {item.icon}
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white">{item.title}</h4>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-white">{item.title}</h4>
+                  {item.comingSoon && (
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30 font-bold tracking-wider">
+                      COMING SOON
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-slate-400 mt-0.5">{item.desc}</p>
               </div>
             </motion.div>
@@ -162,10 +170,10 @@ export default function Contact() {
         {/* MAIN CONTENT: DIRECT CONTACTS & CRITIQUE/SUGGESTION FORM */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           
-          {/* BAGIAN KIRI: KARTU KONTAK LANGSUNG */}
+          {/* BAGIAN KIRI: KARTU KONTAK LANGSUNG & GOOGLE MAPS INTERAKTIF */}
           <div className="lg:col-span-5 space-y-4">
             <h2 className="text-lg font-bold text-slate-200 mb-2 flex items-center gap-2">
-              <span>⚡</span> Kontak Langsung
+              Kontak Langsung
             </h2>
 
             {DIRECT_CONTACTS.map((item, index) => (
@@ -196,18 +204,13 @@ export default function Contact() {
                   <div className={`absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br ${item.gradient} opacity-10 rounded-full blur-xl group-hover:opacity-25 transition-opacity`} />
 
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
-                        {item.icon}
-                      </div>
-                      <div>
-                        <h3 className="text-xs text-slate-400 font-medium uppercase tracking-wider">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm font-semibold text-white mt-0.5 group-hover:text-purple-300 transition-colors">
-                          {item.detail}
-                        </p>
-                      </div>
+                    <div>
+                      <h3 className="text-xs text-slate-400 font-medium uppercase tracking-wider">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm font-semibold text-white mt-0.5 group-hover:text-purple-300 transition-colors">
+                        {item.detail}
+                      </p>
                     </div>
 
                     <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white/10 border border-white/10 text-pink-300 whitespace-nowrap">
@@ -222,6 +225,62 @@ export default function Contact() {
                 </div>
               </motion.a>
             ))}
+
+            {/* --- KARTU LOKASI KANTOR DENGAN GOOGLE MAPS INTERAKTIF --- */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+              className="rounded-2xl p-[1.5px] bg-white/10 overflow-hidden relative"
+            >
+              <div className="w-full p-5 rounded-[15px] bg-slate-950/90 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs text-slate-400 font-medium uppercase tracking-wider">
+                      Alamat Sekolah
+                    </h3>
+                    <p className="text-sm font-semibold text-white mt-0.5">
+                      SMKS TERATAI PUTIH GLOBAL 4 BEKASI
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white/10 border border-white/10 text-purple-300">
+                    Kunjungan Resmi
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Alamat SMKS TERATAI PUTIH GLOBAL 4 BEKASI terletak di JL. BKKBN CIKETING MUSTIKA JAYA, Mustika Jaya, Kec. Mustika Jaya, Kota Bekasi, Jawa Barat.
+                </p>
+
+                {/* --- GOOGLE MAPS EMBED (Bisa Zoom In/Out) --- */}
+                <div className="w-full h-48 rounded-xl overflow-hidden border border-white/10 relative">
+                  <iframe
+                    title="Peta Lokasi SMKS TERATAI PUTIH GLOBAL 4 BEKASI"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.079212267438!2d107.0321!3d-6.2575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e698e72c575cb27%3A0x19df770e5b3cb245!2sSMK%20Teratai%20Putih%20Global%204%20Bekasi!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0, filter: "contrast(1.1) invert(90%) hue-rotate(180deg)" }}
+                    allowFullScreen={false}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[11px] text-slate-400">Gunakan ctrl + scroll untuk zoom peta</span>
+                  <a
+                    href="https://maps.google.com/?q=SMK+Teratai+Putih+Global+4+Bekasi"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-bold text-pink-400 hover:text-pink-300 transition-colors flex items-center gap-1"
+                  >
+                    <span>Petunjuk Arah</span>
+                    <span>→</span>
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+
           </div>
 
           {/* BAGIAN KANAN: FORMULIR KRITIK & SARAN */}
@@ -251,7 +310,6 @@ export default function Contact() {
 
               {submittedSuccess ? (
                 <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center">
-                  <span className="text-4xl">🎉</span>
                   <h3 className="text-lg font-bold text-emerald-400 mt-2">Kritik & Saran Terkirim!</h3>
                   <p className="text-xs text-slate-300 mt-1">
                     Terima kasih telah memberikan masukan. Setiap tanggapan Anda sangat berarti untuk kemajuan TerfourShop.
@@ -336,7 +394,7 @@ export default function Contact() {
                     </div>
                   </div>
 
-                  {/* INPUT KATEGORI KUSTOM (HANYA MUNCUL JIKA "Lainnya" DIPILIH) */}
+                  {/* INPUT KATEGORI KUSTOM */}
                   <AnimatePresence>
                     {formData.category === "Lainnya" && (
                       <motion.div
@@ -392,7 +450,6 @@ export default function Contact() {
           </motion.div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }
