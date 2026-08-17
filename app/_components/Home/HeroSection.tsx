@@ -38,7 +38,7 @@ export default function HeroSection() {
   const handleExploreClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (!isRegistered) {
-      router.push("/register");
+      router.push("/registrasi");
     } else if (isLoggedIn) {
       router.push("/shopping");
     } else {

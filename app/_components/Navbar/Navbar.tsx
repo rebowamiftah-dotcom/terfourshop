@@ -48,7 +48,7 @@ export default function Navbar({ menus }: NavbarProps) {
     // Pengecekan spesifik untuk menu Belanja / Shopping
     if (href === '/shopping' || href === '/shop' || titleId.toLowerCase().includes('belanja')) {
       if (!isRegistered) {
-        return '/register';
+        return '/registrasi';
       }
       if (isLoggedIn) {
         return '/shopping';

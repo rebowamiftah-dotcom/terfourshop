@@ -42,13 +42,6 @@ const DIRECT_CONTACTS = [
   },
 ];
 
-// --- SHORTCUT BANTUAN CEPAT (E-COMMERCE QUICK LINKS) ---
-const QUICK_HELP = [
-  { id: 1, title: "Lacak Pesanan", icon: "📦", desc: "Cek posisi paket Anda real-time", href: "/track-order" },
-  { id: 2, title: "Kebijakan Retur", icon: "🔄", desc: "Panduan pengembalian & Garansi", href: "/returns" },
-  { id: 3, title: "Pusat FAQ", icon: "❓", desc: "Jawaban instan masalah umum", href: "/faq" },
-];
-
 export default function Contact() {
   const router = useRouter();
 
@@ -77,7 +70,7 @@ export default function Contact() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Logika Cek Pendaftaran: Jika belum terdaftar, arahkan ke /register
+    // Logika Cek Pendaftaran: Jika belum terdaftar, arahkan ke /registrasi
     if (!isRegistered) {
       router.push("/registrasi");
       return;
@@ -89,9 +82,22 @@ export default function Contact() {
     const finalCategory =
       formData.category === "Lainnya" ? formData.customCategory : formData.category;
 
-    // Simulasi pengiriman pesan
+    // Membuat link mailto untuk mengirim email sungguhan via aplikasi email klien
+    const recipientEmail = "support@terfourshop.id";
+    const subject = encodeURIComponent(`[Kritik & Saran] ${finalCategory} - ${formData.name}`);
+    const bodyText = encodeURIComponent(
+      `Nama Lengkap: ${formData.name}\n` +
+      `Email Pengirim: ${formData.email}\n` +
+      `Nomor Pesanan: ${formData.orderId || "-"}\n` +
+      `Kategori: ${finalCategory}\n\n` +
+      `Detail Pesan:\n${formData.message}`
+    );
+
+    // Buka aplikasi mail client pengguna
+    window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${bodyText}`;
+
+    // Tampilkan status sukses
     setTimeout(() => {
-      console.log("Data terkirim:", { ...formData, category: finalCategory });
       setIsSubmitting(false);
       setSubmittedSuccess(true);
       setFormData({
@@ -102,7 +108,7 @@ export default function Contact() {
         customCategory: "",
         message: "",
       });
-    }, 1500);
+    }, 1000);
   };
 
   return (
@@ -137,26 +143,6 @@ export default function Contact() {
           >
             Pilih saluran kontak langsung di bawah ini untuk respons cepat, atau sampaikan kritik dan saran Anda melalui formulir.
           </motion.p>
-        </div>
-
-        {/* QUICK E-COMMERCE SHORTCUTS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-14">
-          {QUICK_HELP.map((item) => (
-            <motion.div
-              key={item.id}
-              whileHover={{ y: -4 }}
-              onClick={() => router.push(item.href)}
-              className="cursor-pointer p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-pink-500/40 hover:bg-white/10 transition-all flex items-center gap-4"
-            >
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-xl shrink-0">
-                {item.icon}
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white">{item.title}</h4>
-                <p className="text-xs text-slate-400 mt-0.5">{item.desc}</p>
-              </div>
-            </motion.div>
-          ))}
         </div>
 
         {/* MAIN CONTENT: DIRECT CONTACTS & CRITIQUE/SUGGESTION FORM */}
@@ -254,7 +240,7 @@ export default function Contact() {
                   <span className="text-4xl">🎉</span>
                   <h3 className="text-lg font-bold text-emerald-400 mt-2">Kritik & Saran Terkirim!</h3>
                   <p className="text-xs text-slate-300 mt-1">
-                    Terima kasih telah memberikan masukan. Setiap tanggapan Anda sangat berarti untuk kemajuan TerfourShop.
+                    Terima kasih telah memberikan masukan. Aplikasi email Anda telah dibuka untuk mengirimkan pesan tersebut.
                   </p>
                   <button
                     onClick={() => setSubmittedSuccess(false)}
@@ -384,7 +370,7 @@ export default function Contact() {
                     disabled={isSubmitting}
                     className="w-full py-4 rounded-xl bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-400 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-purple-500/25 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                   >
-                    {isSubmitting ? "Mengirim Masukan..." : "Kirim Kritik & Saran"}
+                    {isSubmitting ? "Membuka Aplikasi Email..." : "Kirim Kritik & Saran"}
                   </button>
                 </form>
               )}

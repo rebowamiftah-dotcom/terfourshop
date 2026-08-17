@@ -20,11 +20,6 @@ const FEATURES = [
     title: "Pembayaran Aman & Imersif",
     desc: "Mendukung berbagai metode pembayaran modern secara aman dan praktis.",
   },
-  {
-    number: "04",
-    title: "Dukungan AI 24/7",
-    desc: "Layanan bantuan responsif yang siap melayani pertanyaan Anda kapan saja.",
-  },
 ];
 
 export default function FeaturesAndFlashSale() {
@@ -75,7 +70,7 @@ export default function FeaturesAndFlashSale() {
 
       {/* 4. VALUE PROPOSITION / KEUNGGULAN TOKO */}
       <section className="py-20 container mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {FEATURES.map((feat, index) => (
             <motion.div
               key={index}
@@ -151,27 +146,27 @@ export default function FeaturesAndFlashSale() {
                 </p>
               </div>
 
-          <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 shrink-0">
-            <div className="flex gap-2 text-center">
-              <div className="bg-slate-950/90 px-4 py-2.5 rounded-xl border border-white/10 shadow-inner">
-                <span className="text-xl font-bold text-purple-400 font-mono">
-                  {String(timeLeft.hours).padStart(2, "0")}
-                </span>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Jam</p>
-              </div>
-              <div className="bg-slate-950/90 px-4 py-2.5 rounded-xl border border-white/10 shadow-inner">
-                <span className="text-xl font-bold text-pink-400 font-mono">
-                  {String(timeLeft.minutes).padStart(2, "0")}
-                </span>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Menit</p>
-              </div>
-              <div className="bg-slate-950/90 px-4 py-2.5 rounded-xl border border-white/10 shadow-inner">
-                <span className="text-xl font-bold text-cyan-400 font-mono">
-                  {String(timeLeft.seconds).padStart(2, "0")}
-                </span>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Detik</p>
-              </div>
-            </div>
+              <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 shrink-0">
+                <div className="flex gap-2 text-center">
+                  <div className="bg-slate-950/90 px-4 py-2.5 rounded-xl border border-white/10 shadow-inner">
+                    <span className="text-xl font-bold text-purple-400 font-mono">
+                      {String(timeLeft.hours).padStart(2, "0")}
+                    </span>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Jam</p>
+                  </div>
+                  <div className="bg-slate-950/90 px-4 py-2.5 rounded-xl border border-white/10 shadow-inner">
+                    <span className="text-xl font-bold text-pink-400 font-mono">
+                      {String(timeLeft.minutes).padStart(2, "0")}
+                    </span>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Menit</p>
+                  </div>
+                  <div className="bg-slate-950/90 px-4 py-2.5 rounded-xl border border-white/10 shadow-inner">
+                    <span className="text-xl font-bold text-cyan-400 font-mono">
+                      {String(timeLeft.seconds).padStart(2, "0")}
+                    </span>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Detik</p>
+                  </div>
+                </div>
 
                 <button
                   onClick={handleGoToStore}
