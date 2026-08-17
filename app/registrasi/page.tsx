@@ -1,15 +1,38 @@
 "use client";
 
+import clsx from "clsx";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion, Variants } from "framer-motion";
 import { useForm, FieldErrors, FieldError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registrasiSchema, RegistrasiFormValues } from "@/lib/validations/auth";
-import { motion, Variants } from "framer-motion";
-import clsx from "clsx";
-import Link from "next/link";
-import { toast } from "@/components/UI/Toast";
 import { CloseEyesIcon, OpenEyesIcon } from "@/components/Icon";
+import { toast } from "@/components/UI/Toast";
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.15,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+    },
+  },
+};
 
 export default function RegistrasiPage() {
   const router = useRouter();
@@ -18,7 +41,8 @@ export default function RegistrasiPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Inisialisasi React Hook Form
+  // INISIALISASI REACT HOOK FORM
+
   const { register, handleSubmit } = useForm<RegistrasiFormValues>({
     resolver: zodResolver(registrasiSchema),
     defaultValues: {
@@ -28,30 +52,8 @@ export default function RegistrasiPage() {
     },
   });
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.15,
-      },
-    },
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-      },
-    },
-  };
-
   // HANDLER REGISTRASI
+
   const onSubmit = async (data: RegistrasiFormValues) => {
     if (isLoading) return;
 
@@ -60,29 +62,31 @@ export default function RegistrasiPage() {
 
       const response = await fetch("/api/registrasi", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
       const result = await response.json();
 
+      // REGISTRASI GAGAL
+
       if (!response.ok || !result.success) {
         toast.add({
-          title: "Registrasi gagal",
+          title: "Registrasi Gagal",
           description: result.message ?? "Tidak dapat melakukan registrasi.",
         });
 
         return;
       };
 
+      // REGISTRASI BERHASIL
+
       toast.add({
         title: "Registrasi berhasil",
         description: "Kode verifikasi telah dikirim ke email Anda.",
       });
 
-      router.push(`/registrasi/verifikasi?email=${encodeURIComponent(data.email.trim().toLowerCase())}`);
+      router.push("/registrasi/verifikasi");
 
     } catch (error) {
       console.error("Register error:", error);
@@ -97,15 +101,15 @@ export default function RegistrasiPage() {
     };
   };
 
-  // HANDLER REGISTRASI KETIKA VALIDASI GAGAL
+  // HANDLER VALIDASI
+
   const onError = (errors: FieldErrors<RegistrasiFormValues>) => {
-    // Ambil pesan error pertama yang ditemukan
     const firstError = Object.values(errors)[0] as FieldError | undefined;
 
-    if (firstError) {
+    if (firstError?.message) {
       toast.add({
         title: "Input Tidak Valid",
-        description: String(firstError),
+        description: firstError.message,
       });
     };
   };
@@ -140,7 +144,7 @@ export default function RegistrasiPage() {
             </p>
           </div>
 
-          {/* FORM REGISTRASI: Pass `onError` sebagai parameter kedua */}
+          {/* Form */}
           <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
             {/* Email */}
             <div>
@@ -173,17 +177,14 @@ export default function RegistrasiPage() {
                   className="w-full px-4 pr-12 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
                   disabled={isLoading}
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-slate-400 hover:text-white transition-colors focus:outline-none"
                   title={showPassword ? "Sembunyikan Password" : "Tampilkan Password"}
                 >
-                  {showPassword ? (
-                    <CloseEyesIcon className="w-4 h-4" />
-                  ) : (
-                    <OpenEyesIcon className="w-4 h-4" />
-                  )}
+                  {showPassword ? <CloseEyesIcon className="w-4 h-4" /> : <OpenEyesIcon className="w-4 h-4" />}
                 </button>
               </div>
             </div>
@@ -209,11 +210,7 @@ export default function RegistrasiPage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-slate-400 hover:text-white transition-colors focus:outline-none"
                   title={showConfirmPassword ? "Sembunyikan Password" : "Tampilkan Password"}
                 >
-                  {showConfirmPassword ? (
-                    <CloseEyesIcon className="w-4 h-4" />
-                  ) : (
-                    <OpenEyesIcon className="w-4 h-4" />
-                  )}
+                  {showConfirmPassword ? <CloseEyesIcon className="w-4 h-4" /> : <OpenEyesIcon className="w-4 h-4" />}
                 </button>
               </div>
             </div>
@@ -223,7 +220,7 @@ export default function RegistrasiPage() {
               type="submit"
               disabled={isLoading}
               className={clsx(
-                "w-full py-3 mt-2 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2",
+                "w-full py-3 mt-2 text-white text-xs sm:text-sm font-semibold rounded-xl flex items-center justify-center gap-2",
                 "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500",
                 "shadow-lg shadow-purple-500/25",
                 "hover:scale-[1.01] active:scale-[0.99]",
@@ -242,9 +239,10 @@ export default function RegistrasiPage() {
             </button>
           </form>
 
-          {/* FOOTER CARD */}
-          <div className="mt-6 pt-5 border-t border-white/10 text-center text-xs text-slate-400">
+          {/* Footer */}
+          <div className="mt-4 sm:mt-6 pt-3 sm:pt-5 border-t border-white/10 text-center text-xs text-slate-400">
             Sudah memiliki akun?{" "}
+
             <Link href="/login" className="font-semibold text-purple-300 hover:text-pink-400 transition-colors">
               Masuk di sini
             </Link>

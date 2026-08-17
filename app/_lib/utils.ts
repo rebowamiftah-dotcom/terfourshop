@@ -18,7 +18,7 @@ export function generateUsername(email: string): string {
   const safeBase = base || "user";
   const uniqueId = uuidv4().replace(/-/g, "").slice(0, 8);
 
-  return `@${safeBase}_${uniqueId}`;
+  return `${safeBase}_${uniqueId}`;
 }
 
 // Helper untuk Memformat Nomor Telepon

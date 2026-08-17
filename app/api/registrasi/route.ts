@@ -1,15 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
+import { v7 as uuidv7 } from "uuid";
+import bcrypt from "bcryptjs";
+
 import { prisma } from "@/lib/prisma";
 import { sendVerificationOTP } from "@/lib/mailer";
+import { registrasiSchema } from "@/lib/validations/auth";
+
 import {
   generateOTP,
   hashOTP,
   getOTPExpiration,
   getOTPResendCooldown,
 } from "@/lib/otp";
-import { registrasiSchema } from "@/lib/validations/auth";
-import { v7 as uuidv7 } from "uuid";
-import bcrypt from "bcryptjs";
+
+import {
+  generateAuthToken,
+  hashAuthToken,
+  getAuthTokenExpiration
+} from "@/lib/authToken";
+
+import {
+  REGISTRASI_COOKIE,
+  REGISTRASI_VERIFICATION_MAX_AGE
+} from "@/app/_lib/verifyRegistrasi";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +33,6 @@ export async function POST(request: NextRequest) {
     const validationResult = registrasiSchema.safeParse(body);
 
     if (!validationResult.success) {
-      // Mengambil pesan error pertama dari Zod
       const firstError = validationResult.error.issues[0]?.message ?? "Input tidak valid.";
 
       return NextResponse.json(
@@ -31,7 +43,7 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
-    }
+    };
 
     const { email, password } = validationResult.data;
     const cleanEmail = email.toLowerCase();
@@ -50,45 +62,64 @@ export async function POST(request: NextRequest) {
         },
         { status: 409 }
       );
-    }
+    };
 
-    // CEK PRA REGISTER & COOLDOWN OTP
+    // CARI PRA REGISTER
 
     const praRegister = await prisma.praRegister.findUnique({
       where: { email: cleanEmail },
     });
 
-    const remainingCooldown = getOTPResendCooldown(praRegister?.last_otp_sent_at);
+    // CEK COOLDOWN OTP
 
-    if (remainingCooldown > 0) {
+    const remaining = getOTPResendCooldown(praRegister?.last_otp_sent_at);
+
+    if (remaining > 0) {
       return NextResponse.json(
         {
           success: false,
-          message: `Silakan tunggu ${remainingCooldown} detik sebelum meminta OTP lagi.`,
+          message: `Silakan tunggu ${remaining} detik sebelum meminta OTP lagi.`,
+          remainingSeconds: remaining,
         },
         { status: 429 }
       );
-    }
+    };
 
-    // GENERATE OTP & HASH PASSWORD
-
+    // GENERATE OTP
+    
     const otp = generateOTP();
     const otpHash = await hashOTP(otp);
+
+    // HASH PASSWORD
+  
     const passwordHash = await bcrypt.hash(password, 12);
+
+    // TOKEN VERIFIKASI
+
+    const registrasiToken = generateAuthToken();   // Disimpan pd HTTP-only cookie
+    const registrasiTokenHash =  hashAuthToken(registrasiToken);   // Disimpan di DB
+    const registrasiTokenExpiresAt = getAuthTokenExpiration(REGISTRASI_VERIFICATION_MAX_AGE);   // Menit
+
+    // OTP EXPIRATION
+
     const otpExpiredAt = getOTPExpiration();
     const now = new Date();
 
-    // BUAT / UPDATE PRA REGISTER
+    // UPSERT PRA REGISTER
 
     await prisma.praRegister.upsert({
       where: { email: cleanEmail },
+      
       update: {
         password: passwordHash,
         otp: otpHash,
         otp_attempts: 0,
         last_otp_sent_at: now,
         expires_at: otpExpiredAt,
+        registrasi_token: registrasiTokenHash,
+        registrasi_token_expires_at: registrasiTokenExpiresAt,
       },
+
       create: {
         id: uuidv7(),
         email: cleanEmail,
@@ -97,17 +128,33 @@ export async function POST(request: NextRequest) {
         otp_attempts: 0,
         last_otp_sent_at: now,
         expires_at: otpExpiredAt,
+        registrasi_token: registrasiTokenHash,
+        registrasi_token_expires_at: registrasiTokenExpiresAt,
       },
     });
 
     // KIRIM EMAIL OTP
+
     await sendVerificationOTP(cleanEmail, otp);
 
     // RESPONSE SUKSES
-    return NextResponse.json({
+
+    const response = NextResponse.json({
       success: true,
       message: "Kode OTP telah dikirim ke email Anda.",
     });
+
+    // SET HTTPONLY COOKIE
+
+    response.cookies.set(REGISTRASI_COOKIE, registrasiToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: REGISTRASI_VERIFICATION_MAX_AGE * 60,   // Menit
+      path: "/",
+    });
+
+    return response;
 
   } catch (error) {
     console.error("Registrasi Error:", error);

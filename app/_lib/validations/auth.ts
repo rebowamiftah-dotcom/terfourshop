@@ -1,8 +1,6 @@
 import { z } from "zod";
 
 // REGISTRASI
-
-// Registrasi
 export const registrasiSchema = z
   .object({
     email: z
@@ -19,24 +17,7 @@ export const registrasiSchema = z
     path: ["confirmPassword"],   // Pesan error akan muncul di field confirmPassword
   });
 
-// Verifikasi OTP
-export const verifyOTPSchema = z.object({
-  email: z
-    .email({ message: "Format email tidak valid." }),
-  otp: z
-    .string()
-    .min(6, { message: "Kode OTP wajib diisi." })
-    .regex(/^\d{6}$/, { message: "Kode OTP harus berupa 6 digit angka." }),
-});
-
-// Kirim Ulang OTP 
-export const resendOTPSchema = z.object({
-  email: z
-  .email({ message: "Format email tidak valid." }),
-});
-
 // LOGIN
-
 export const loginSchema = z.object({
   identity: z
     .string()
@@ -46,9 +27,15 @@ export const loginSchema = z.object({
     .min(8, { message: "Kata sandi wajib diisi." }),
 });
 
+// Verifikasi OTP
+export const verifyOTPSchema = z.object({
+  otp: z
+    .string({ message: "Kode OTP wajib diisi." })
+    .min(6, { message: "Kode OTP wajib diisi." })
+    .regex(/^\d{6}$/, { message: "Kode OTP harus berupa 6 digit angka." }),
+});
+
 // Type inference untuk TypeScript
 export type RegistrasiFormValues = z.infer<typeof registrasiSchema>;
-export type VerifyOTPInput = z.infer<typeof verifyOTPSchema>;
-export type ResendOTPInput = z.infer<typeof resendOTPSchema>;
-
 export type LoginFormValues = z.infer<typeof loginSchema>;  
+export type VerifyOTPInput = z.infer<typeof verifyOTPSchema>;
