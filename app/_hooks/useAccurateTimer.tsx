@@ -2,61 +2,51 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-export function useAccurateTimer(initialSeconds: number) {
-  // Inisialisasi targetTime langsung di awal (Lazy Initial State)
-  const [targetTime, setTargetTime] = useState<number | null>(() => {
-    return initialSeconds > 0 ? Date.now() + initialSeconds * 1000 : null;
-  });
+export function useAccurateTimer(targetTime: number | null) {
+  const [currentTarget, setCurrentTarget] = useState<number | null>(
+    targetTime
+  );
 
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(initialSeconds);
+  // Initial state HARUS statis agar SSR dan Client sama
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
 
-  // Fungsi manual untuk Reset Timer
-  const startTimer = useCallback((seconds: number) => {
-    const now = Date.now();
+  const resetTimer = useCallback((newTargetTime: number) => { setCurrentTarget(newTargetTime) }, []);
 
-    setTargetTime(now + seconds * 1000);
-
-    setRemainingSeconds(seconds);
-  }, []);
-
-  // Single Effect untuk menghitung Interval & Event Listener
   useEffect(() => {
-    if (!targetTime) return;
+    if (currentTarget === null) {
+      return;
+    };
 
-    const calculateRemaining = () => {
-      const now = Date.now();
+    const updateRemaining = () => {
+      const remaining = Math.max(0, Math.ceil((currentTarget - Date.now()) / 1000));
 
-      const diffInSeconds = Math.max(0, Math.ceil((targetTime - now) / 1000));
+      setRemainingSeconds(remaining);
 
-      setRemainingSeconds(diffInSeconds);
-
-      if (diffInSeconds <= 0) {
-        setTargetTime(null);
+      if (remaining <= 0) {
+        setCurrentTarget(null);
       };
     };
 
-    // Hitung sisa waktu saat ini juga
-    calculateRemaining();
+    const interval = setInterval(updateRemaining, 1000);
 
-    const timer = setInterval(calculateRemaining, 1000);
-
-    const handleVisibility = () => {
+    const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        calculateRemaining();
+        updateRemaining();
       };
     };
 
-    document.addEventListener("visibilitychange", handleVisibility);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      clearInterval(timer);
-      document.removeEventListener("visibilitychange", handleVisibility);
+      clearInterval(interval);
+
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [targetTime]);
+  }, [currentTarget]);
 
   return {
     remainingSeconds,
-    isExpired: remainingSeconds <= 0,
-    resetTimer: startTimer,
+    isExpired: currentTarget === null || remainingSeconds <= 0,
+    resetTimer,
   };
 }

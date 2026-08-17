@@ -3,8 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import type { AuthOptions } from "next-auth";
 
 import { prisma } from "@/lib/prisma";
-import { hashLoginToken } from "@/lib/loginToken";
-import { isExpired } from "@/lib/utils";
+import { hashAuthToken, isAuthTokenExpired } from "@/app/_lib/authToken";
 
 import bcrypt from "bcryptjs";
 
@@ -38,19 +37,18 @@ export const authOptions: AuthOptions = {
         // JALUR 1: LOGIN MENGGUNAKAN LOGIN TOKEN
 
         if (credentials.loginToken) {
-          const loginTokenHash = hashLoginToken(credentials.loginToken);
+          const loginTokenHash = hashAuthToken(credentials.loginToken);
 
-          // PraLogin + User + Role
           const praLogin = await prisma.praLogin.findUnique({
             where: { login_token: loginTokenHash },
             include: {
               user: {
-                include: { roles: true }
+                include: { roles: true },
               },
             },
           });
 
-          if (!praLogin || isExpired(praLogin.login_token_expires_at)) {
+          if (!praLogin || isAuthTokenExpired(praLogin.login_token_expires_at)) {
             return null;
           };
 
@@ -64,22 +62,29 @@ export const authOptions: AuthOptions = {
 
         // JALUR 2: USERNAME + PASSWORD
 
-        if (!credentials.identity || !credentials.password) {
+        if (!credentials.identity || !credentials.password ) {
           return null;
         };
 
-        const inputIdentity = credentials.identity.trim().toLowerCase();
+        const username = credentials.identity.trim().toLowerCase();
 
-        const user = await prisma.user.findFirst({
-          where: { username: inputIdentity },
-          include: { roles: true }
+        if (!username) {
+          return null;
+        };
+
+        // CARI USER
+
+        const user = await prisma.user.findUnique({
+          where: { username, },
+          include: { roles: true },
         });
 
         if (!user?.password) {
           return null;
         };
 
-        const isValidPassword = await bcrypt.compare(credentials.password,user.password);
+        // Verifikasi password
+        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
 
         if (!isValidPassword) {
           return null;
@@ -92,12 +97,12 @@ export const authOptions: AuthOptions = {
           role: user.roles.name,
         };
       },
-    })
+    }),
   ],
 
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,    // Masa Waktu Session = 30 Hari
+    maxAge: 30 * 24 * 60 * 60,   // Masa berlaku session = 30 hari
   },
 
   callbacks: {
@@ -114,11 +119,11 @@ export const authOptions: AuthOptions = {
 
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id
+        session.user.id = token.id;
         session.user.username = token.username;
         session.user.email = token.email;
         session.user.role = token.role;
-      }
+      };
 
       return session;
     },

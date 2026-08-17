@@ -427,15 +427,19 @@ model Store {
 }
 
 model PraRegister {
-  id               String    @id @db.Char(36)
-  email            String    @unique @db.VarChar(255)
-  password         String    @db.VarChar(60)
-  otp              String    @db.VarChar(60)
-  otp_attempts     Int       @default(0) @db.UnsignedTinyInt
-  last_otp_sent_at DateTime? @db.Timestamp(0)
-  expires_at       DateTime  @db.Timestamp(0)
-  created_at       DateTime  @default(now()) @db.Timestamp(0)
-  updated_at       DateTime  @updatedAt @db.Timestamp(0)
+  id                          String    @id @db.Char(36)
+  email                       String    @unique @db.VarChar(255)
+  password                    String    @db.VarChar(60)
+  // OTP
+  otp                         String    @db.VarChar(60)
+  otp_attempts                Int       @default(0) @db.UnsignedTinyInt
+  last_otp_sent_at            DateTime? @db.Timestamp(0)
+  expires_at                  DateTime  @db.Timestamp(0)
+  // Registrasi Token
+  registrasi_token            String?   @unique @db.VarChar(255)
+  registrasi_token_expires_at DateTime?
+  created_at                  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at                  DateTime  @updatedAt @db.Timestamp(0)
 
   @@map("pra_registrations")
 }
@@ -443,20 +447,18 @@ model PraRegister {
 model PraLogin {
   id                     String    @id @db.Char(36)
   user_id                String    @unique @db.Char(36)
-
-  // Waktu OTP Berakhir
-  otp                    String    @db.VarChar(60) 
+  // OTP
+  otp                    String    @db.VarChar(60)
   otp_attempts           Int       @default(0)
   last_otp_sent_at       DateTime?
   expires_at             DateTime
-
   // Token Login
   login_token            String?   @unique @db.VarChar(255)
   login_token_expires_at DateTime?
 
-  created_at             DateTime  @default(now()) @db.Timestamp(0)
-  updated_at             DateTime  @updatedAt @db.Timestamp(0)
-  user                   User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @updatedAt @db.Timestamp(0)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("pra_logins")
 }
