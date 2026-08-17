@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { v7 as uuidv7 } from "uuid";
-import { prisma } from "@/app/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 const uuid = () => uuidv7();
 const money = (value: number) => value.toFixed(2);

@@ -45,8 +45,8 @@ export async function GET(request: Request) {
       // 2. Hitung rata-rata rating dari pembeli
       const reviewItems = prod.order_items.filter((item) => item.reviews !== null);
       const avgRating = reviewItems.length > 0
-        ? (reviewItems.reduce((acc, item) => acc + item.reviews!.rating, 0) / reviewItems.length).toFixed(1)
-        : "0.0"; // Jika belum ada ulasan
+      ? (reviewItems.reduce((acc, item) => acc + Number(item.reviews!.rating), 0) / reviewItems.length).toFixed(1)
+       : "0.0";// Jika belum ada ulasan
 
       // 3. Logika untuk Badge/Tag (Bisa disesuaikan)
       let tag = "Ready Stock";

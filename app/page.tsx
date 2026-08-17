@@ -5,6 +5,7 @@ import FeaturedProducts from "@/components/Home/FeaturedProducts";
 import FeaturesAndFlashSale from "@/components/Home/FeaturesAndFlashSale";
 import ProblemSolution from "@/components/Home/ProblemSolution";
 
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-slate-950">
@@ -13,7 +14,9 @@ export default function Home() {
       <FeaturedCategories />
       <FeaturedProducts />
       <FeaturesAndFlashSale />
-      <ProblemSolution  />
+      <ProblemSolution />
+      
+     
     </div>
   );
 }

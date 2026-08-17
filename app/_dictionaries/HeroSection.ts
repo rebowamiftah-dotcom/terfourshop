@@ -12,27 +12,27 @@ export const dictionary: Record<LanguageKey, {
   statsLatency: string;
 }> = {
   id: {
-    badge: "Pengalaman Belanja Generasi Baru",
-    headlinePrefix: "Masa Depan",
-    headlineSuffix: "Bersama TerfourShop",
+    badge: "Pengalaman Belanja Modern & Terpercaya",
+    headlinePrefix: "Temukan Gaya",
+    headlineSuffix: "Terbaikmu Bersama TerfourShop",
     subheadline:
-      "Jelajahi produk eksklusif dengan pengalaman interaktif imersif. Belanja lebih cepat, interaktif, dan futuristik langsung dari browser Anda.",
-    btnShop: "Jelajahi Toko",
+      "Jelajahi berbagai pilihan produk berkualitas tinggi dengan pengalaman belanja yang cepat, mudah, dan aman langsung dari genggaman Anda.",
+    btnShop: "Kunjungi Toko",
     btnAbout: "Tentang Kami",
-    statsProduct: "Produk Digital & Fisik",
+    statsProduct: "Produk Berkualitas",
     statsSatisfaction: "Kepuasan Pelanggan",
-    statsLatency: "Render Latency",
+    statsLatency: "Respon Sistem",
   },
   en: {
-    badge: "Next-Gen Shopping Experience",
-    headlinePrefix: "The Future of",
-    headlineSuffix: "With TerfourShop",
+    badge: "Modern & Trusted Shopping Experience",
+    headlinePrefix: "Find Your Best",
+    headlineSuffix: "Style With TerfourShop",
     subheadline:
-      "Explore exclusive products with an immersive interactive experience. Shop faster, interactively, and futuristically right from your browser.",
+      "Explore a wide range of high-quality products with a fast, easy, and secure shopping experience right from your device.",
     btnShop: "Explore Shop",
     btnAbout: "About Us",
-    statsProduct: "Digital & Physical Products",
+    statsProduct: "Quality Products",
     statsSatisfaction: "Customer Satisfaction",
-    statsLatency: "Render Latency",
+    statsLatency: "System Response",
   },
 };
