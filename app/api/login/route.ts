@@ -22,7 +22,7 @@ import {
 import {
   LOGIN_COOKIE,
   LOGIN_VERIFICATION_MAX_AGE,
-} from "@/app/_lib/verifyLogin";
+} from "@/lib/verifyLogin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -130,8 +130,8 @@ export async function POST(request: NextRequest) {
           message: "Email atau password salah.",
         },
         { status: 401 }
-      );;
-    }
+      );
+    };
 
     // CEK PASSWORD
 

@@ -17,7 +17,6 @@ const containerVariants: Variants = {
 
   visible: {
     opacity: 1,
-
     transition: {
       staggerChildren: 0.12,
       delayChildren: 0.2,
@@ -30,11 +29,9 @@ const itemVariants: Variants = {
     opacity: 0,
     y: 20,
   },
-
   visible: {
     opacity: 1,
     y: 0,
-
     transition: {
       duration: 0.6,
       ease: "easeOut",
@@ -186,10 +183,10 @@ export default function LoginPage() {
       >
         <motion.div
           variants={itemVariants}
-          className="w-full max-w-md p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl shadow-purple-950/20 text-left"
+          className="w-full max-w-md px-8 py-6 sm:py-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl shadow-purple-950/20 text-left"
         >
           {/* Badge & Title */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-5 sm:mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-4 text-xs text-purple-300 animate-pulse">
               <span className="w-2 h-2 rounded-full bg-purple-400" />
               Secure Gateway
@@ -209,7 +206,7 @@ export default function LoginPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-3 sm:space-y-5">
             {/* Identitas (Username / Email) */}
             <div>
               <label htmlFor="identity" className="block text-xs font-semibold text-slate-300 mb-2">
@@ -220,8 +217,8 @@ export default function LoginPage() {
                 {...register("identity")}
                 type="text"
                 id="identity"
-                placeholder="@username atau nama@email.com"
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
+                placeholder="@username / nama@email.com"
+                className="w-full px-4 py-2.5 sm:py-3 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
                 disabled={isLoading}
               />
             </div>
@@ -244,14 +241,14 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   placeholder="Masukkan kata sandi Anda"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm pr-10"
+                  className="w-full px-4 py-2.5 sm:py-3 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm pr-10"
                   disabled={isLoading}
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-slate-400 hover:text-white transition-colors focus:outline-none cursor-pointer"
                   title={ showPassword ? "Sembunyikan Password" : "Tampilkan Password" }
                 >
                   {showPassword ? <CloseEyesIcon className="w-4 h-4" /> : <OpenEyesIcon className="w-4 h-4" />}
@@ -264,7 +261,7 @@ export default function LoginPage() {
               type="submit"
               disabled={isLoading}
               className={clsx(
-                "w-full py-3.5 mt-2 text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-2",
+                "w-full py-2.5 sm:py-3.5 mt-2 text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-2",
                 "bg-gradient-to-r from-purple-600 to-indigo-600",
                 "hover:from-purple-500 hover:to-indigo-500",
                 "shadow-lg shadow-purple-500/25",
@@ -286,7 +283,7 @@ export default function LoginPage() {
           </form>
 
           {/* Footer */}
-          <div className="mt-6 pt-6 border-t border-white/10 text-center text-xs text-slate-400">
+          <div className="mt-4 sm:mt-6 pt-3 sm:pt-6 border-t border-white/10 text-center text-xs text-slate-400">
             Belum memiliki akun?{" "}
 
             <Link href="/registrasi" className="font-semibold text-purple-300 hover:text-pink-400 transition-colors">

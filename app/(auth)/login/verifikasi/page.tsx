@@ -20,6 +20,7 @@ export default async function VerifikasiPage() {
 
   return (
     <VerifikasiForm
+      email={praLogin.user.email}
       otpExpiresAt={otpExpiresAt}
       resendAvailableAt={resendAvailableAt}
     />

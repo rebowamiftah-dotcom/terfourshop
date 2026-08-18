@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { hashAuthToken, isAuthTokenExpired } from "@/lib/authToken";
 
 export const REGISTRASI_COOKIE = "registration_verification";
-export const REGISTRASI_VERIFICATION_MAX_AGE = 5;   // Menit
+export const REGISTRASI_VERIFICATION_MAX_AGE = 10;   // Menit
 
 // VERIFIKASI TOKEN REGISTRASI
 
