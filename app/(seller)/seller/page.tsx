@@ -122,14 +122,10 @@ export default function SellerPage() {
 
   return (
     <div className="w-full min-h-screen bg-slate-950 text-white overflow-hidden relative flex flex-col justify-between">
-      {/* GLOW BACKGROUND DEKORATIF */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none -z-10" />
       <div className="absolute top-3/4 right-10 w-[400px] h-[400px] bg-pink-500/10 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-      {/* Grid Pattern Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none -z-10" />
-
-      {/* ----------------- HERO SECTION (POSISI NAIK KE ATAS) ----------------- */}
       <section className="pt-20 sm:pt-20 pb-12 sm:pb-16 px-6 relative z-10 min-h-[85vh] flex items-center justify-center">
         <motion.div
           variants={containerVariants}
@@ -214,7 +210,7 @@ export default function SellerPage() {
         </motion.div>
       </section>
 
-      {/* ----------------- BENEFIT SECTION ----------------- */}
+      {/* BENEFIT SECTION */}
       <section id="benefit" className="py-16 px-6 relative z-10 bg-slate-900/40 border-y border-white/5">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -264,7 +260,6 @@ export default function SellerPage() {
         </div>
       </section>
 
-      {/* ----------------- CARA BERJUALAN ----------------- */}
       <section className="py-16 px-6 relative z-10">
         <div className="container mx-auto max-w-5xl">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -299,7 +294,7 @@ export default function SellerPage() {
         </div>
       </section>
 
-      {/* ----------------- BANNER CTA BOTTOM ----------------- */}
+      {/*  BANNER DAFTAR */}
       <section className="pb-16 px-6 relative z-10">
         <div className="container mx-auto max-w-4xl">
           <div className="relative rounded-2xl p-8 sm:p-10 bg-gradient-to-r from-purple-900/60 via-slate-900 to-indigo-900/60 border border-purple-500/30 overflow-hidden text-center flex flex-col items-center">

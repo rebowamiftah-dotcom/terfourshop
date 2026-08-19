@@ -39,16 +39,16 @@ export async function GET(request: Request) {
 
     // Kalkulasi Dinamis: Rating, Terjual, dan Badge Tag
     const formattedProducts = products.map((prod) => {
-      // 1. Hitung total barang terjual (berdasarkan quantity di order_items)
+      //  Hitung total barang terjual (berdasarkan quantity di order_items)
       const soldCount = prod.order_items.reduce((total, item) => total + item.quantity, 0);
 
-      // 2. Hitung rata-rata rating dari pembeli
+      // Hitung rata-rata rating dari pembeli
       const reviewItems = prod.order_items.filter((item) => item.reviews !== null);
       const avgRating = reviewItems.length > 0
-      ? (reviewItems.reduce((acc, item) => acc + Number(item.reviews!.rating), 0) / reviewItems.length).toFixed(1)
-       : "0.0";// Jika belum ada ulasan
+        ? (reviewItems.reduce((acc, item) => acc + Number(item.reviews!.rating), 0) / reviewItems.length).toFixed(1)
+        : "0.0";// Jika belum ada ulasan
 
-      // 3. Logika untuk Badge/Tag (Bisa disesuaikan)
+      // Logika untuk Badge/Tag (Bisa disesuaikan)
       let tag = "Ready Stock";
       if (soldCount > 50) tag = "Best Seller";
       else if (prod.stock < 15) tag = "Limited";

@@ -14,9 +14,9 @@ const TEAM_MEMBERS = [
     title: "Anggota",
     handle: "Frontend",
     status: "Siswa SMK",
-    avatarUrl: "/person.png", // Ganti dengan gambar di folder public Anda
+    avatarUrl: "/miftah.png", // Ganti dengan gambar di folder public Anda
     contactUrl: "https://instagram.com/",
-    glowColor: "rgba(56, 189, 248, 0.6)" // Biru
+    glowColor: "rgba(16, 185, 129, 0.6)" // Hijau
   },
   {
     id: 2,
@@ -24,7 +24,7 @@ const TEAM_MEMBERS = [
     title: "Kapten",
     handle: "Backend",
     status: "Siswa SMK",
-    avatarUrl: "/person.png", // Ganti dengan gambar di folder public Anda
+    avatarUrl: "/fauzian.png", // Ganti dengan gambar di folder public Anda
     contactUrl: "https://instagram.com/",
     glowColor: "rgba(16, 185, 129, 0.6)" // Hijau
   },
@@ -34,7 +34,7 @@ const TEAM_MEMBERS = [
     title: "Anggota",
     handle: "Frontend",
     status: "Siswa SMK",
-    avatarUrl: "/person.png", // Ganti dengan gambar di folder public Anda
+    avatarUrl: "/fahkri.png", // Ganti dengan gambar di folder public Anda
     contactUrl: "https://instagram.com/",
     glowColor: "rgba(217, 70, 239, 0.6)" // Pink
   }
