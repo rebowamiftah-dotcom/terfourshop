@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const GRADIENTS = [
@@ -12,21 +11,43 @@ const GRADIENTS = [
   "from-amber-400 to-orange-500",
 ];
 
+// Fungsi untuk menentukan gambar asli yang berbeda sesuai nama kategori
+const getFallbackImage = (categoryName: string) => {
+  const name = (categoryName || "").toLowerCase();
+  
+  if (name.includes("fashion") || name.includes("baju") || name.includes("pakaian")) {
+    return "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80"; // Foto rak baju/fashion
+  }
+  if (name.includes("elektronik") || name.includes("tv") || name.includes("ac")) {
+    // LINK DIPERBARUI: Menggunakan foto perangkat elektronik/gadget yang lebih stabil
+    return "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=600&q=80"; 
+  }
+  if (name.includes("komputer") || name.includes("aksesoris")) {
+    return "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=600&q=80"; // Foto setup komputer/aksesoris
+  }
+  if (name.includes("makanan") || name.includes("minuman") || name.includes("food")) {
+    return "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80"; // Foto hidangan makanan
+  }
+  
+  // Default gambar retail umum jika nama kategori tidak masuk dalam list di atas
+  return "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=600&q=80"; 
+};
+
 export default function FeaturedCategories() {
   const router = useRouter();
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- FETCH KATEGORI DARI DATABASE API ---
+  // --- FETCH KATEGORI DARI API ---
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await fetch("/api/categories");
-        const data = await res.json();
+        const responseData = await res.json();
 
-        if (data.success) {
+        if (responseData.success) {
           // Dibatasi hanya mengambil 4 kategori teratas saja
-          setCategories(data.categories.slice(0, 4));
+          setCategories(responseData.categories.slice(0, 4));
         }
       } catch (err) {
         console.error("Gagal memuat kategori:", err);
@@ -42,7 +63,7 @@ export default function FeaturedCategories() {
     return (
       <section className="py-20 container mx-auto px-6 relative bg-slate-950 text-white text-center">
         <p className="text-xs font-mono text-purple-400 tracking-widest animate-pulse">
-          LOADING CATEGORIES VAULT...
+          MEMUAT KATEGORI PRODUK...
         </p>
       </section>
     );
@@ -57,21 +78,22 @@ export default function FeaturedCategories() {
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
         <div>
           <span className="text-xs font-semibold uppercase tracking-widest text-purple-400">
-            Kategori Terfavorit
+            TERFOURSHOP
           </span>
           <h2 className="text-2xl sm:text-4xl font-extrabold mt-1">
-            Jelajahi Berdasarkan Kategori
+            Jelajahi Kategori Pilihan
           </h2>
         </div>
         <p className="text-slate-400 text-sm max-w-md mt-2 md:mt-0 font-light">
-          Temukan berbagai koleksi produk pilihan yang telah dikategorikan untuk kemudahan Anda.
+          Temukan berbagai macam produk berkualitas tinggi yang dikurasi khusus untuk memenuhi kebutuhan gaya hidup Anda.
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {categories.map((cat, index) => {
           const gradientClass = GRADIENTS[index % GRADIENTS.length];
-          const categoryImage = cat.image || "/jason.jpg";
+          // Gunakan gambar dari database JIKA ADA, jika kosong gunakan fungsi dinamis
+          const categoryImage = cat.image || getFallbackImage(cat.name);
 
           return (
             <motion.div
@@ -111,11 +133,16 @@ export default function FeaturedCategories() {
 
                 {/* Kontainer Gambar Kategori */}
                 <div className="relative w-full h-44 rounded-xl overflow-hidden mb-4 bg-slate-900 border border-white/5">
-                  <Image
+                  <img
                     src={categoryImage}
                     alt={cat.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      // Jika URL database error/rusak, fallback ke fungsi dinamis
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = getFallbackImage(cat.name);
+                    }}
                   />
                   <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded text-[10px] font-mono bg-slate-950/80 text-cyan-300 border border-white/10 z-10 backdrop-blur-sm">
                     {cat.product_categories?.length || 0} Produk
@@ -128,7 +155,7 @@ export default function FeaturedCategories() {
                     {cat.name}
                   </h3>
                   <p className="text-xs text-slate-400 mt-1.5 font-light leading-relaxed line-clamp-2">
-                    {cat.description || `Jelajahi berbagai produk pilihan dalam kategori ${cat.name}.`}
+                    {cat.description || `Koleksi lengkap dan resmi di bawah klasifikasi ${cat.name}.`}
                   </p>
                 </div>
               </div>
