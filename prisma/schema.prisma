@@ -455,12 +455,33 @@ model PraLogin {
   // Token Login
   login_token            String?   @unique @db.VarChar(255)
   login_token_expires_at DateTime?
-
-  created_at DateTime @default(now()) @db.Timestamp(0)
-  updated_at DateTime @updatedAt @db.Timestamp(0)
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at             DateTime  @default(now()) @db.Timestamp(0)
+  updated_at             DateTime  @updatedAt @db.Timestamp(0)
+  user                   User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("pra_logins")
+}
+
+model PraForgotPassword {
+  id                      String    @id @db.Char(36)
+  user_id                 String    @unique @db.Char(36)
+  // OTP
+  otp                     String    @db.VarChar(60)
+  otp_attempts            Int       @default(0)
+  last_otp_sent_at        DateTime?
+  expires_at              DateTime
+  // Token OTP
+  forgot_token            String?   @unique @db.VarChar(255)
+  forgot_token_expires_at DateTime?
+  // Token Reset
+  reset_token             String?   @unique @db.VarChar(255)
+  reset_token_expires_at  DateTime?
+  created_at              DateTime  @default(now()) @db.Timestamp(0)
+  updated_at              DateTime  @updatedAt @db.Timestamp(0)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("pra_forgot_passwords")
 }
 
 model Member {
@@ -478,23 +499,24 @@ model Member {
 }
 
 model User {
-  id         String    @id @db.Char(36)
-  username   String    @unique(map: "username") @db.VarChar(50)
-  email      String    @unique(map: "email") @db.VarChar(255)
-  password   String?   @db.VarChar(60)
-  phone      String?   @unique(map: "phone") @db.VarChar(14)
-  role_id    String    @db.Char(36)
-  created_at DateTime  @default(now()) @db.Timestamp(0)
-  updated_at DateTime  @updatedAt @db.Timestamp(0)
-  members    Member?
-  addresses  Address[]
-  carts      Cart?
-  orders     Order[]
-  profiles   Profile?
-  reviews    Review[]
-  sellers    Seller?
-  pralogin   PraLogin?
-  roles      Role      @relation(fields: [role_id], references: [id], map: "fk_users_role")
+  id                String             @id @db.Char(36)
+  username          String             @unique(map: "username") @db.VarChar(50)
+  email             String             @unique(map: "email") @db.VarChar(255)
+  password          String?            @db.VarChar(60)
+  phone             String?            @unique(map: "phone") @db.VarChar(14)
+  role_id           String             @db.Char(36)
+  created_at        DateTime           @default(now()) @db.Timestamp(0)
+  updated_at        DateTime           @updatedAt @db.Timestamp(0)
+  members           Member?
+  addresses         Address[]
+  carts             Cart?
+  orders            Order[]
+  profiles          Profile?
+  reviews           Review[]
+  sellers           Seller?
+  pralogin          PraLogin?
+  praForgotPassword PraForgotPassword?
+  roles             Role               @relation(fields: [role_id], references: [id], map: "fk_users_role")
 
   @@index([role_id], map: "fk_users_role")
   @@map("users")

@@ -10,21 +10,18 @@ import {
 type HeaderContextType = {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (value: boolean) => void;
-  isLoggedIn: boolean;
 };
 
 const HeaderContext = createContext<HeaderContextType | null>(null);
 
 export function HeaderProvider({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoggedIn] = useState(false);
 
   return (
     <HeaderContext.Provider
       value={{
         isMobileMenuOpen,
         setIsMobileMenuOpen,
-        isLoggedIn,
       }}
     >
       {children}

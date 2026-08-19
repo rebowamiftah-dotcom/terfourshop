@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, Variants } from "framer-motion";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import clsx from "clsx";
 
@@ -58,14 +59,12 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
     const minutes = Math.floor(seconds / 60);
     const remaining = seconds % 60;
 
-    return `${String(minutes).padStart(2, "0")}:${String(
-      remaining
-    ).padStart(2, "0")}`;
+    return `${String(minutes).padStart(2, "0")}:${String(remaining).padStart(2, "0")}`;
   };
 
   // HANDLER VERIFIKASI OTP
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     if (isLoading || isResending || isMaxAttempts) {
@@ -95,10 +94,9 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
     try {
       setIsLoading(true);
 
-      const response = await fetch("/api/registrasi/verifikasi", {
+      const response = await fetch("/api/login/verifikasi", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ otp }),
       });
 
@@ -113,10 +111,10 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
         if (response.status === 401) {
           toast.add({
             title: "Sesi Verifikasi Berakhir",
-            description: "Silakan melakukan registrasi kembali.",
+            description: "Silakan melakukan login kembali.",
           });
 
-          router.replace("/registrasi");
+          router.replace("/login");
 
           return;
         };
@@ -127,29 +125,49 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
         };
 
         toast.add({
-          title: "Verifikasi Gagal",
-          description: errorMsg,
+          title: "Gagal",
+          description: errorMsg ?? "Verifikasi OTP gagal.",
         });
 
         return;
       };
 
-      // VERIFIKASI BERHASIL
+      // BUAT CREDENTIALS DARI NEXT-AUTH
 
-      toast.add({
-        title: "Verifikasi Berhasil",
-        description: "Akun Anda berhasil dibuat. Silakan login.",
+      // Login Gagal
+
+      const authRes = await signIn("credentials", {
+        loginToken: result.loginToken,
+        redirect: false,
       });
 
-      router.replace("/login");
-    
-    } catch (error) {
-      console.error("Verification error:", error);
+      if (authRes?.error) {
+        toast.add({
+          title: "Gagal Sesi",
+          description: "Gagal membuat sesi login.",
+        });
+
+        return;
+      };
+
+      // Login Berhasil
 
       toast.add({
-        title: "Terjadi Kesalahan",
-        description: "Gagal menghubungkan ke server. Silakan coba lagi.",
+        title: "Berhasil",
+        description: "Verifikasi berhasil! Mengalihkan...",
       });
+
+      router.replace("/shopping");
+      router.refresh();
+
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Terjadi kesalahan sistem.";
+
+      toast.add({
+        title: "Error",
+        description: message,
+      });
+
     } finally {
       setIsLoading(false);
     }
@@ -157,7 +175,7 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
 
   // HANDLER RESEND OTP
 
-  const handleResendOTP = async () => {
+  const handleResend = async () => {
     const canResend = resendTimer.isExpired || isMaxAttempts;
 
     if (isLoading || isResending || !canResend) {
@@ -167,7 +185,7 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
     try {
       setIsResending(true);
 
-      const response = await fetch("/api/registrasi/resend-otp", {
+      const response = await fetch("/api/login/resend-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -185,14 +203,14 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
             description: "Silakan melakukan registrasi kembali.",
           });
 
-          router.replace("/registrasi");
+          router.replace("/login");
 
           return;
         };
 
         toast.add({
-          title: "Gagal Kirim OTP",
-          description: result.message ?? "Tidak dapat mengirim ulang kode OTP.",
+          title: "Gagal Kirim Ulang",
+          description: result.message ?? "Gagal mengirim ulang OTP.",
         });
 
         return;
@@ -202,7 +220,7 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
 
       toast.add({
         title: "OTP Terkirim",
-        description: "Kode OTP baru telah dikirimkan ke email Anda.",
+        description: "Kode OTP baru telah dikirim ke email Anda.",
       });
 
       if ( typeof result.otpExpiresAt !== "number" || typeof result.resendAvailableAt !== "number") {
@@ -253,23 +271,23 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
           <div className="text-center mb-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-4 text-xs text-purple-300">
               <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-              Email Verification
+              Security Check
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-4">
               Verifikasi{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300">
-                Email
+                Login
               </span>
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-400 font-light leading-relaxed">
-              Masukkan kode verifikasi yang telah kami kirimkan ke email Anda.
+              Masukkan kode verifikasi keamanan 6-digit untuk masuk ke akun Anda.
             </p>
           </div>
 
           <div className="mb-6 text-center">
-            <p className="text-md text-slate-400 mb-1">
+            <p className="text-xs sm:text-md text-slate-400 mb-1">
               Kode dikirim ke{" "}
               <span className="font-medium text-purple-300 break-all">
                 {email}
@@ -279,7 +297,7 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
 
           {/* Form Otp */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="mb-6">
+            <div>
               <label className="block text-sm font-semibold text-slate-300 mb-2 text-center">
                 Kode OTP
               </label>
@@ -288,7 +306,7 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
                 length={6}
                 value={otp}
                 onChange={setOtp}
-                disabled={isLoading || otpTimer.isExpired ||isMaxAttempts}
+                disabled={isLoading || otpTimer.isExpired || isMaxAttempts}
               />
             </div>
 
@@ -316,7 +334,7 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={ isLoading || otp.length !== 6 || otpTimer.isExpired || isMaxAttempts }
+              disabled={ isLoading || otp.length !== 6 || otpTimer.isExpired || isMaxAttempts}
               className={clsx(
                 "w-full py-2 sm:py-3 text-white text-sm font-semibold rounded-xl",
                 "bg-gradient-to-r from-purple-600 to-indigo-600",
@@ -328,7 +346,7 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
                 "disabled:cursor-not-allowed"
               )}
             >
-              {isLoading ? "Memverifikasi..." : "Verifikasi OTP"}
+              { isLoading ? "Memverifikasi..." : "Verifikasi OTP" }
             </button>
           </form>
 
@@ -338,9 +356,9 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
               {isMaxAttempts ? "Batas verifikasi tercapai. Minta kode baru:" : "Tidak menerima kode?"}
             </p>
 
-            <button
+          <button
               type="button"
-              onClick={handleResendOTP}
+              onClick={handleResend}
               disabled={!isResendAllowed}
               className={clsx(
                 "text-xs font-semibold transition-colors",
@@ -360,10 +378,10 @@ export default function VerifikasiForm({ email, otpExpiresAt, resendAvailableAt 
 
           {/* Footer */}
           <div className="mt-5 pt-5 border-t border-white/10 text-center text-xs text-slate-400">
-            Salah memasukkan email?{" "}
+            Salah masuk akun?{" "}
 
-            <Link href="/registrasi" className="font-semibold text-purple-300 hover:text-pink-400 transition-colors">
-              Kembali ke Registrasi
+            <Link href="/login" className="font-semibold text-purple-300 hover:text-pink-400 transition-colors">
+              Kembali ke Login
             </Link>
           </div>
         </motion.div>

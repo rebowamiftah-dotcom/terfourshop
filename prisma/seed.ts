@@ -49,6 +49,7 @@ async function main() {
     await prisma.profile.deleteMany();
     await prisma.address.deleteMany();
 
+    await prisma.praForgotPassword.deleteMany();
     await prisma.praRegister.deleteMany();
     await prisma.praLogin.deleteMany();
     await prisma.user.deleteMany();

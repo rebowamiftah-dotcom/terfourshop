@@ -115,7 +115,7 @@ export default function RegistrasiPage() {
   };
 
   return (
-    <section className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-x-hidden bg-slate-950 text-white py-12">
+    <section className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-x-hidden bg-slate-950 text-white py-6">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -124,7 +124,7 @@ export default function RegistrasiPage() {
       >
         <motion.div
           variants={itemVariants}
-          className="w-full p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl shadow-purple-950/20 text-left"
+          className="w-full px-8 py-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl shadow-purple-950/20 text-left"
         >
           {/* Badge & Title */}
           <div className="text-center mb-6">
@@ -157,7 +157,7 @@ export default function RegistrasiPage() {
                 type="email"
                 id="email"
                 placeholder="nama@email.com"
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
+                className="w-full px-4 py-2 sm:py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
                 disabled={isLoading}
               />
             </div>
@@ -174,14 +174,14 @@ export default function RegistrasiPage() {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   placeholder="Masukkan minimal 8 karakter"
-                  className="w-full px-4 pr-12 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
+                  className="w-full px-4 pr-12 py-2 sm:py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
                   disabled={isLoading}
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                  className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-slate-400 hover:text-white transition-colors focus:outline-none cursor-pointer"
                   title={showPassword ? "Sembunyikan Password" : "Tampilkan Password"}
                 >
                   {showPassword ? <CloseEyesIcon className="w-4 h-4" /> : <OpenEyesIcon className="w-4 h-4" />}
@@ -201,13 +201,13 @@ export default function RegistrasiPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   id="confirmPassword"
                   placeholder="Ulangi kata sandi"
-                  className="w-full px-4 pr-12 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
+                  className="w-full px-4 pr-12 py-2 sm:py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all text-sm"
                   disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                  className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-slate-400 hover:text-white transition-colors focus:outline-none cursor-pointer"
                   title={showConfirmPassword ? "Sembunyikan Password" : "Tampilkan Password"}
                 >
                   {showConfirmPassword ? <CloseEyesIcon className="w-4 h-4" /> : <OpenEyesIcon className="w-4 h-4" />}
@@ -220,7 +220,7 @@ export default function RegistrasiPage() {
               type="submit"
               disabled={isLoading}
               className={clsx(
-                "w-full py-3 mt-2 text-white text-xs sm:text-sm font-semibold rounded-xl flex items-center justify-center gap-2",
+                "w-full py-2.5 sm:py-3 mt-2 text-white text-xs sm:text-sm font-semibold rounded-xl flex items-center justify-center gap-2",
                 "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500",
                 "shadow-lg shadow-purple-500/25",
                 "hover:scale-[1.01] active:scale-[0.99]",

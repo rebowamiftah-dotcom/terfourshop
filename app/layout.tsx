@@ -3,8 +3,6 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 
 import AppProviders from "@/components/Providers/AppProviders";
-import Header from "@/components/Header/Header";
-import Footer from "@/components/Footer";
 import { Toaster } from "@/components/UI/Toast";
 
 const geistSans = Geist({
@@ -13,21 +11,16 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "TerfourShop",
-  description: "Temukan berbagai produk berkualitas tinggi dengan penawaran terbaik dan layanan pelanggan 24 jam hanya di TerfourShop.",
+  title: "Terfour Shop",
+  description: "Terfour Shop Ecommerce",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-w-[350px] min-h-full flex flex-col">
+    <html lang="id" className={`${geistSans.variable} h-full antialiased`}>
+      <body className="min-w-87.5 min-h-full">
         <AppProviders>
-          <Header />
-          <main>
-            {children}
-          </main>
-
-          <Footer />
+          {children}
 
           <Toaster />
         </AppProviders>
