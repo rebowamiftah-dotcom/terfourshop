@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { hashAuthToken, isAuthTokenExpired } from "@/lib/authToken";
 
 export const LOGIN_COOKIE = "login_verification_token";
-export const LOGIN_VERIFICATION_MAX_AGE = 5;   // Menit
+export const LOGIN_VERIFICATION_MAX_AGE = 10;   // Menit
 
 // VERIFIKASI TOKEN LOGIN
 
@@ -19,8 +19,16 @@ export async function getLoginVerify() {
 
   const tokenHash = hashAuthToken(token);
 
-  const praLogin = await prisma.praLogin.findFirst({
+  const praLogin = await prisma.praLogin.findUnique({
     where: { login_token: tokenHash },
+    include: {
+      user: {
+        select: {
+          email: true,
+          username: true,
+        },
+      },
+    },
   });
 
   if (!praLogin) {

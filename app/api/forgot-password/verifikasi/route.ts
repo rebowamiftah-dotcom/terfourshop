@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { v7 as uuidv7 } from "uuid";
 
 import { prisma } from "@/lib/prisma";
-import { generateUsername } from "@/lib/utils";
 import { verifyOTPSchema } from "@/lib/validations/auth";
-import { REGISTRASI_COOKIE } from "@/lib/verifyRegistrasi";
 import { getOTPExpired, verifyOTP } from "@/lib/otp";
-import { hashAuthToken, isAuthTokenExpired } from "@/lib/authToken";
+import { FORGOT_PASSWORD_COOKIE } from "@/lib/verifyForgotPassword";
+
+import {
+  generateAuthToken,
+  hashAuthToken,
+  getAuthTokenExpiration,
+  isAuthTokenExpired,
+} from "@/lib/authToken";
+
+import {
+  RESET_PASSWORD_COOKIE,
+  RESET_PASSWORD_VERIFICATION_MAX_AGE,
+} from "@/lib/verifyResetPassword";
 
 const MAX_OTP_ATTEMPTS = 5;
 
@@ -15,7 +24,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // VALIDASI OTP
+    // VALIDASI
 
     const validationResult = verifyOTPSchema.safeParse({ otp: body.otp });
 
@@ -38,13 +47,13 @@ export async function POST(request: NextRequest) {
 
     const cookieStore = await cookies();
 
-    const token = cookieStore.get(REGISTRASI_COOKIE)?.value;
+    const token = cookieStore.get(FORGOT_PASSWORD_COOKIE)?.value;
 
     if (!token) {
       return NextResponse.json(
         {
           success: false,
-          message: "Sesi verifikasi tidak ditemukan. Silakan melakukan registrasi kembali.",
+          message: "Sesi verifikasi tidak ditemukan. Silakan meminta reset password kembali.",
         },
         { status: 401 }
       );
@@ -54,29 +63,38 @@ export async function POST(request: NextRequest) {
 
     const tokenHash = hashAuthToken(token);
 
-    // CARI PRA REGISTER
+    // CARI PRA FORGOT PASSWORD
 
-    const praRegister = await prisma.praRegister.findFirst({
-      where: { registrasi_token: tokenHash },
+    const praForgotPassword = await prisma.praForgotPassword.findUnique({
+      where: { forgot_token: tokenHash },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+          },
+        },
+      },
     });
 
-    if (!praRegister) {
+    if (!praForgotPassword) {
       return NextResponse.json(
         {
           success: false,
-          message: "Sesi verifikasi tidak valid. Silakan melakukan registrasi kembali.",
+          message: "Sesi verifikasi tidak valid. Silakan meminta reset password kembali.",
         },
         { status: 401 }
       );
-    }
+    };
 
     // CEK TOKEN EXPIRED
 
-    if (isAuthTokenExpired(praRegister.registrasi_token_expires_at)) {
+    if (isAuthTokenExpired(praForgotPassword.forgot_token_expires_at)) {
       return NextResponse.json(
         {
           success: false,
-          message: "Sesi verifikasi telah kedaluwarsa. Silakan melakukan registrasi kembali.",
+          message: "Sesi verifikasi telah kedaluwarsa. Silakan meminta reset password kembali.",
         },
         { status: 401 }
       );
@@ -84,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     // CEK OTP EXPIRED
 
-    if (getOTPExpired(praRegister.expires_at)) {
+    if (getOTPExpired(praForgotPassword.expires_at)) {
       return NextResponse.json(
         {
           success: false,
@@ -94,9 +112,9 @@ export async function POST(request: NextRequest) {
       );
     };
 
-    // CEK ATTEMPTS
+    // CEK MAX ATTEMPTS
 
-    if (praRegister.otp_attempts >= MAX_OTP_ATTEMPTS) {
+    if (praForgotPassword.otp_attempts >= MAX_OTP_ATTEMPTS) {
       return NextResponse.json(
         {
           success: false,
@@ -104,17 +122,17 @@ export async function POST(request: NextRequest) {
         },
         { status: 429 }
       );
-    }
+    };
 
     // VERIFIKASI OTP
 
-    const isValidOTP = await verifyOTP(cleanOtp, praRegister.otp);
+    const isValidOTP = await verifyOTP(cleanOtp, praForgotPassword.otp);
 
     if (!isValidOTP) {
-      const newAttempts = praRegister.otp_attempts + 1;
+      const newAttempts = praForgotPassword.otp_attempts + 1;
 
-      await prisma.praRegister.update({
-        where: { email: praRegister.email },
+      await prisma.praForgotPassword.update({
+        where: { user_id: praForgotPassword.user_id },
         data: { otp_attempts: newAttempts },
       });
 
@@ -132,83 +150,54 @@ export async function POST(request: NextRequest) {
       );
     };
 
-    // GENERATE USERNAME
+    // GENERATE TOKEN RESET
 
-    let username = generateUsername(praRegister.email);
+    const resetToken = generateAuthToken();
+    const resetTokenHash = hashAuthToken(resetToken);
+    const resetTokenExpiresAt = getAuthTokenExpiration(RESET_PASSWORD_VERIFICATION_MAX_AGE);
 
-    while (await prisma.user.findUnique({ where: { username } })) {
-      username = generateUsername(praRegister.email);
-    };
+    // UPDATE PRA FORGOT PASSWORD DGN RESET TOKEN
 
-    // TRANSACTION
-
-    const user = await prisma.$transaction(async (tx) => {
-      const customerRole = await tx.role.findUnique({
-        where: { name: "CUSTOMER" }
-      });
-
-      if (!customerRole) {
-        throw new Error("Role CUSTOMER tidak ditemukan.");
-      };
-
-      const newUser = await tx.user.create({
-        data: {
-          id: uuidv7(),
-          username,
-          email: praRegister.email,
-          password: praRegister.password,
-          role_id: customerRole.id,
-        },
-      });
-
-      await tx.profile.create({
-        data: {
-          id: uuidv7(),
-          user_id: newUser.id,
-        },
-      });
-
-      await tx.cart.create({
-        data: {
-          id: uuidv7(),
-          user_id: newUser.id,
-        },
-      });
-
-      await tx.address.create({
-        data: {
-          id: uuidv7(),
-          user_id: newUser.id,
-        },
-      });
-
-      await tx.praRegister.delete({
-        where: { email: praRegister.email }
-      });
-
-      return newUser;
+    await prisma.praForgotPassword.update({
+      where: { user_id: praForgotPassword.user_id },
+      data: {
+        reset_token: resetTokenHash,
+        reset_token_expires_at: resetTokenExpiresAt,
+        otp_attempts: 0,
+        expires_at: new Date(0),
+      },
     });
 
     // RESPONSE SUKSES
 
     const response = NextResponse.json({
       success: true,
-      message: "Registrasi berhasil. Silakan login.",
+      message: "OTP berhasil diverifikasi.",
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
+        id: praForgotPassword.user.id,
+        email: praForgotPassword.user.email,
+        username: praForgotPassword.user.username,
       },
     });
 
-    // HAPUS COOKIE
+    // HAPUS COOKIE FORGOT
 
-    response.cookies.delete(REGISTRASI_COOKIE);
+    response.cookies.delete(FORGOT_PASSWORD_COOKIE);
+
+    // SET HTTPONLY COOKIE RESET
+
+    response.cookies.set(RESET_PASSWORD_COOKIE, resetToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: RESET_PASSWORD_VERIFICATION_MAX_AGE * 60,
+      path: "/",
+    });
 
     return response;
 
   } catch (error) {
-    console.error("Verify OTP error:", error);
+    console.error("Forgot password OTP verification error:", error);
 
     return NextResponse.json(
       {

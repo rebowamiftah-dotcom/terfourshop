@@ -15,7 +15,7 @@ import {
 import {
   LOGIN_COOKIE,
   LOGIN_VERIFICATION_MAX_AGE,
-} from "@/app/_lib/verifyLogin";
+} from "@/lib/verifyLogin";
 
 const MAX_OTP_ATTEMPTS = 5;
 
@@ -155,9 +155,7 @@ export async function POST(request: NextRequest) {
     // UPDATE PRA LOGIN
 
     await prisma.praLogin.update({
-      where: {
-        user_id: praLogin.user_id,
-      },
+      where: { user_id: praLogin.user_id },
       data: {
         login_token: verifiedLoginTokenHash,
         login_token_expires_at: verifiedLoginTokenExpiresAt,

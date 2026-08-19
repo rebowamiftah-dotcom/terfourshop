@@ -22,7 +22,7 @@ import {
 import {
   REGISTRASI_COOKIE,
   REGISTRASI_VERIFICATION_MAX_AGE
-} from "@/app/_lib/verifyRegistrasi";
+} from "@/lib/verifyRegistrasi";
 
 export async function POST(request: NextRequest) {
   try {

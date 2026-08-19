@@ -7,7 +7,7 @@ import { sendVerificationOTP } from "@/lib/mailer";
 import {
   LOGIN_COOKIE,
   LOGIN_VERIFICATION_MAX_AGE,
-} from "@/app/_lib/verifyLogin";
+} from "@/lib/verifyLogin";
 
 import {
   generateOTP,

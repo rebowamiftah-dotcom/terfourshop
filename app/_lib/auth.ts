@@ -43,7 +43,10 @@ export const authOptions: AuthOptions = {
             where: { login_token: loginTokenHash },
             include: {
               user: {
-                include: { roles: true },
+                include: {
+                  roles: true,
+                  profiles: true,
+                },
               },
             },
           });
@@ -56,6 +59,7 @@ export const authOptions: AuthOptions = {
             id: praLogin.user.id,
             name: praLogin.user.username,
             email: praLogin.user.email,
+            image: praLogin.user.profiles?.avatar ?? null,
             role: praLogin.user.roles.name,
           };
         };
@@ -76,7 +80,10 @@ export const authOptions: AuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { username, },
-          include: { roles: true },
+          include: {
+            roles: true,
+            profiles: true,
+          },
         });
 
         if (!user?.password) {
@@ -94,6 +101,7 @@ export const authOptions: AuthOptions = {
           id: user.id,
           name: user.username,
           email: user.email,
+          image: user.profiles?.avatar ?? null,
           role: user.roles.name,
         };
       },
@@ -111,6 +119,7 @@ export const authOptions: AuthOptions = {
         token.id = user.id;
         token.username = user.name ?? "";
         token.email = user.email ?? "";
+        token.image = user.image ?? null;
         token.role = user.role;
       };
 
@@ -122,6 +131,7 @@ export const authOptions: AuthOptions = {
         session.user.id = token.id;
         session.user.username = token.username;
         session.user.email = token.email;
+        session.user.image = token.image;
         session.user.role = token.role;
       };
 
