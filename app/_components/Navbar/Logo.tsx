@@ -10,7 +10,7 @@ interface LogoProps {
 const Logo = ({ title, link, img }: LogoProps) => {
   return (
     <div className="flex items-center gap-3 shrink-0 group">
-      <Link href="/" className="relative w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/10 flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
+      <Link href={link} className="relative w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/10 flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
         <Image 
           src={img}
           alt="Logo Toko"

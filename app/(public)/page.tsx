@@ -15,8 +15,6 @@ export default function Home() {
       <FeaturedProducts />
       <FeaturesAndFlashSale />
       <ProblemSolution />
-      
-     
     </div>
   );
 }

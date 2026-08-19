@@ -567,14 +567,22 @@ async function main() {
     // =========================================================
 
     const categoryData = [
-        ["Fashion", "fashion"],
-        ["Elektronik", "elektronik"],
-        ["Komputer & Aksesoris", "komputer-aksesoris"],
-        ["Makanan & Minuman", "makanan-minuman"],
-        ["Rumah Tangga", "rumah-tangga"],
-        ["Kecantikan", "kecantikan"],
-        ["Olahraga", "olahraga"],
-        ["Tas & Sepatu", "tas-sepatu"],
+        ["Fashion", "fashion", "https://images.unsplash.com/photo-1445205170230-053b83016050"],
+        ["Elektronik", "elektronik", "https://images.unsplash.com/photo-1498049794561-7780e7231661"],
+        ["Komputer & Aksesoris", "komputer-aksesoris", "https://images.unsplash.com/photo-1517336714731-489689fd1ca8"],
+        ["Makanan & Minuman", "makanan-minuman", "https://images.unsplash.com/photo-1498837167922-ddd27525d352"],
+        ["Rumah Tangga", "rumah-tangga", "https://images.unsplash.com/photo-1555041469-a586c61ea9bc"],
+        ["Kecantikan", "kecantikan", "https://images.unsplash.com/photo-1596462502278-27bfdc403348"],
+        ["Olahraga", "olahraga", "https://images.unsplash.com/photo-1461896836934-ffe607ba8211"],
+        ["Tas & Sepatu", "tas-sepatu", "https://images.unsplash.com/photo-1542291026-7eec264c27ff"],
+        ["Ibu & Bayi", "ibu-bayi", "https://images.unsplash.com/photo-1519689680058-45822e9ffb4f"],
+        ["Buku & Alat Tulis", "buku-alat-tulis", "https://images.unsplash.com/photo-1544947950-fa07a98d237f"],
+        ["Otomotif", "otomotif", "https://images.unsplash.com/photo-1503376780353-7e6692767b70"],
+        ["Hobi & Koleksi", "hobi-koleksi", "https://images.unsplash.com/photo-1521337581100-8ca9a73a5f79"],
+        ["Pet Supplies", "pet-supplies", "https://images.unsplash.com/photo-1450778869180-41d0601e046e"],
+        ["Furniture", "furniture", "https://images.unsplash.com/photo-1555041469-a586c61ea9bc"],
+        ["Perhiasan & Aksesoris", "perhiasan-aksesoris", "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338"],
+        ["Kesehatan", "kesehatan", "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae"],
     ] as const;
 
     const categoryIds = categoryData.map(() => uuid());
@@ -585,6 +593,7 @@ async function main() {
             name: category[0],
             slug: category[1],
             description: `Kategori ${category[0]}.`,
+            image_url: category[2],
         })),
     });
 
@@ -593,124 +602,31 @@ async function main() {
     // =========================================================
 
     const products = [
-        {
-            store: 0,
-            name: "Kaos Oversize Cotton 24s",
-            slug: "kaos-oversize-cotton-24s",
-            price: 89000,
-            category: [0],
-            options: [
-                { name: "Warna", values: ["Hitam", "Putih", "Navy"] },
-                { name: "Ukuran", values: ["S", "M", "L", "XL"] },
-            ],
-        },
-
-        {
-            store: 1,
-            name: "Hoodie Fleece Premium",
-            slug: "hoodie-fleece-premium",
-            price: 189000,
-            category: [0],
-            options: [
-                { name: "Warna", values: ["Hitam", "Abu-abu"] },
-                { name: "Ukuran", values: ["M", "L", "XL"] },
-            ],
-        },
-
-        {
-            store: 2,
-            name: "Sneakers Urban Daily",
-            slug: "sneakers-urban-daily",
-            price: 329000,
-            category: [7],
-            options: [
-                { name: "Warna", values: ["Putih", "Hitam"] },
-                { name: "Ukuran", values: ["39", "40", "41", "42", "43"] },
-            ],
-        },
-
-        {
-            store: 3,
-            name: "Wireless Mechanical Keyboard",
-            slug: "wireless-mechanical-keyboard",
-            price: 749000,
-            category: [2],
-            options: [
-                { name: "Switch", values: ["Red", "Brown", "Blue"] },
-                { name: "Layout", values: ["75%", "TKL"] },
-            ],
-        },
-
-        {
-            store: 3,
-            name: "Mouse Wireless Ergonomis",
-            slug: "mouse-wireless-ergonomis",
-            price: 259000,
-            category: [2],
-            options: [
-                { name: "Warna", values: ["Hitam", "Putih"] },
-                { name: "DPI", values: ["1200", "2400", "3200"] },
-            ],
-        },
-
-        {
-            store: 4,
-            name: "Headset Bluetooth ANC",
-            slug: "headset-bluetooth-anc",
-            price: 699000,
-            category: [1],
-            options: [
-                { name: "Warna", values: ["Hitam", "Putih"] },
-            ],
-        },
-
-        {
-            store: 5,
-            name: "Smartwatch Active S2",
-            slug: "smartwatch-active-s2",
-            price: 899000,
-            category: [1, 6],
-            options: [
-                { name: "Warna", values: ["Hitam", "Silver"] },
-                { name: "Strap", values: ["Silikon", "Nylon"] },
-            ],
-        },
-
-        {
-            store: 6,
-            name: "Kopi Arabika Gayo",
-            slug: "kopi-arabika-gayo",
-            price: 85000,
-            category: [3],
-            options: [
-                { name: "Berat", values: ["250g", "500g", "1kg"] },
-                { name: "Roast", values: ["Light", "Medium", "Dark"] },
-            ],
-        },
-
-        {
-            store: 7,
-            name: "Sambal Cumi Pedas",
-            slug: "sambal-cumi-pedas",
-            price: 45000,
-            category: [3],
-            options: [
-                { name: "Berat", values: ["150g", "250g", "500g"] },
-                { name: "Level Pedas", values: ["Sedang", "Pedas", "Extra Pedas"] },
-            ],
-        },
-
-        {
-            store: 6,
-            name: "Granola Madu Kacang",
-            slug: "granola-madu-kacang",
-            price: 72000,
-            category: [3],
-            options: [
-                { name: "Berat", values: ["250g", "500g"] },
-                { name: "Rasa", values: ["Madu", "Cokelat"] },
-            ],
-        },
+        { store: 0, name: "Kaos Oversize Cotton 24s", slug: "kaos-oversize-cotton-24s", price: 89000, category: [0], options: [{ name: "Warna", values: ["Hitam", "Putih", "Navy"] }, { name: "Ukuran", values: ["S", "M", "L", "XL"] }] },
+        { store: 0, name: "Celana Cargo Relaxed", slug: "celana-cargo-relaxed", price: 159000, category: [0], options: [{ name: "Warna", values: ["Khaki", "Hitam"] }, { name: "Ukuran", values: ["M", "L", "XL"] }] },
+        { store: 1, name: "Hoodie Fleece Premium", slug: "hoodie-fleece-premium", price: 189000, category: [0], options: [{ name: "Warna", values: ["Hitam", "Abu-abu"] }, { name: "Ukuran", values: ["M", "L", "XL"] }] },
+        { store: 1, name: "Kemeja Oxford Casual", slug: "kemeja-oxford-casual", price: 149000, category: [0], options: [{ name: "Warna", values: ["Putih", "Biru"] }, { name: "Ukuran", values: ["M", "L", "XL"] }] },
+        { store: 2, name: "Sneakers Urban Daily", slug: "sneakers-urban-daily", price: 329000, category: [7], options: [{ name: "Warna", values: ["Putih", "Hitam"] }, { name: "Ukuran", values: ["39", "40", "41", "42", "43"] }] },
+        { store: 2, name: "Running Shoes Lightweight", slug: "running-shoes-lightweight", price: 449000, category: [6, 7], options: [{ name: "Warna", values: ["Hitam", "Abu-abu"] }, { name: "Ukuran", values: ["39", "40", "41", "42", "43"] }] },
+        { store: 3, name: "Wireless Mechanical Keyboard", slug: "wireless-mechanical-keyboard", price: 749000, category: [2], options: [{ name: "Switch", values: ["Red", "Brown", "Blue"] }, { name: "Layout", values: ["75%", "TKL"] }] },
+        { store: 3, name: "Mouse Wireless Ergonomis", slug: "mouse-wireless-ergonomis", price: 259000, category: [2], options: [{ name: "Warna", values: ["Hitam", "Putih"] }, { name: "DPI", values: ["1200", "2400", "3200"] }] },
+        { store: 3, name: "Monitor IPS 24 Inch", slug: "monitor-ips-24-inch", price: 1699000, category: [1, 2], options: [{ name: "Ukuran", values: ["24 Inch"] }, { name: "Refresh Rate", values: ["75Hz", "100Hz"] }] },
+        { store: 4, name: "Headset Bluetooth ANC", slug: "headset-bluetooth-anc", price: 699000, category: [1], options: [{ name: "Warna", values: ["Hitam", "Putih"] }] },
+        { store: 4, name: "Power Bank Fast Charging 20000mAh", slug: "power-bank-fast-charging-20000mah", price: 299000, category: [1], options: [{ name: "Warna", values: ["Hitam", "Putih"] }] },
+        { store: 5, name: "Smartwatch Active S2", slug: "smartwatch-active-s2", price: 899000, category: [1, 6], options: [{ name: "Warna", values: ["Hitam", "Silver"] }, { name: "Strap", values: ["Silikon", "Nylon"] }] },
+        { store: 5, name: "Kamera Mirrorless Travel", slug: "kamera-mirrorless-travel", price: 7299000, category: [1], options: [{ name: "Warna", values: ["Black"] }, { name: "Kit", values: ["Body Only", "16-50mm"] }] },
+        { store: 6, name: "Kopi Arabika Gayo", slug: "kopi-arabika-gayo", price: 85000, category: [3], options: [{ name: "Berat", values: ["250g", "500g", "1kg"] }, { name: "Roast", values: ["Light", "Medium", "Dark"] }] },
+        { store: 6, name: "Sambal Cumi Pedas", slug: "sambal-cumi-pedas", price: 45000, category: [3], options: [{ name: "Berat", values: ["150g", "250g", "500g"] }, { name: "Level Pedas", values: ["Sedang", "Pedas", "Extra Pedas"] }] },
+        { store: 6, name: "Granola Madu Kacang", slug: "granola-madu-kacang", price: 72000, category: [3], options: [{ name: "Berat", values: ["250g", "500g"] }, { name: "Rasa", values: ["Madu", "Cokelat"] }] },
+        { store: 6, name: "Teh Hijau Jasmine Premium", slug: "teh-hijau-jasmine-premium", price: 68000, category: [3], options: [{ name: "Berat", values: ["100g", "250g"] }] },
+        { store: 7, name: "Sofa Minimalis 2 Seater", slug: "sofa-minimalis-2-seater", price: 2499000, category: [4, 13], options: [{ name: "Warna", values: ["Cream", "Grey"] }] },
+        { store: 7, name: "Lampu Meja Scandinavian", slug: "lampu-meja-scandinavian", price: 189000, category: [4], options: [{ name: "Warna", values: ["White", "Black"] }] },
+        { store: 7, name: "Kalung Stainless Minimalis", slug: "kalung-stainless-minimalis", price: 129000, category: [14], options: [{ name: "Warna", values: ["Silver", "Gold"] }] },
+        { store: 0, name: "Serum Niacinamide Brightening", slug: "serum-niacinamide-brightening", price: 119000, category: [5], options: [{ name: "Ukuran", values: ["20ml", "30ml"] }] },
+        { store: 1, name: "Shampoo Daily Care", slug: "shampoo-daily-care", price: 79000, category: [5, 15], options: [{ name: "Ukuran", values: ["250ml", "500ml"] }] },
+        { store: 2, name: "Tas Selempang Casual", slug: "tas-selempang-casual", price: 179000, category: [7], options: [{ name: "Warna", values: ["Black", "Brown"] }] },
+        { store: 3, name: "Buku Notebook Hardcover", slug: "buku-notebook-hardcover", price: 59000, category: [9], options: [{ name: "Ukuran", values: ["A5", "B5"] }] },
+        { store: 4, name: "Mainan Edukasi Anak", slug: "mainan-edukasi-anak", price: 139000, category: [8, 11], options: [{ name: "Usia", values: ["3-5 Tahun", "6-8 Tahun"] }] },
     ] as const;
 
     const productIds = products.map(() => uuid());
@@ -737,66 +653,136 @@ async function main() {
     // URL publik langsung.
     // =========================================================
 
-    const imageUrls = [
-        [
+    const imageUrlBySlug: Record<string, [string, string]> = {
+        "kaos-oversize-cotton-24s": [
             "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
             "https://images.unsplash.com/photo-1503341504253-dff4815485f1",
         ],
-        [
+        "celana-cargo-relaxed": [
+            "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f",
             "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3",
-            "https://images.unsplash.com/photo-1556821840-3a63f95609a7",
         ],
-        [
+        "hoodie-fleece-premium": [
+            "https://images.unsplash.com/photo-1556821840-3a63f95609a7",
+            "https://images.unsplash.com/photo-1578681994506-b8f463449011",
+        ],
+        "kemeja-oxford-casual": [
+            "https://images.unsplash.com/photo-1603252109303-2751441dd157",
+            "https://images.unsplash.com/photo-1598033129183-c4f50c736f10",
+        ],
+        "sneakers-urban-daily": [
             "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
             "https://images.unsplash.com/photo-1495555961986-6d4c1ecb7be3",
         ],
-        [
+        "running-shoes-lightweight": [
+            "https://images.unsplash.com/photo-1460353581641-37baddab0fa2",
+            "https://images.unsplash.com/photo-1552674605-db6ffd4facb5",
+        ],
+        "wireless-mechanical-keyboard": [
             "https://images.unsplash.com/photo-1587829741301-dc798b83add3",
             "https://images.unsplash.com/photo-1595225476474-87563907a212",
         ],
-        [
+        "mouse-wireless-ergonomis": [
             "https://images.unsplash.com/photo-1527814050087-3793815479db",
             "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7",
         ],
-        [
+        "monitor-ips-24-inch": [
+            "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf",
+            "https://images.unsplash.com/photo-1593642632823-8f785ba67e45",
+        ],
+        "headset-bluetooth-anc": [
             "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
             "https://images.unsplash.com/photo-1484704849700-f032a568e944",
         ],
-        [
+        "power-bank-fast-charging-20000mah": [
+            "https://images.unsplash.com/photo-1609592424873-8e8f7f6a1c25",
+            "https://images.unsplash.com/photo-1609592424810-6e9e1f6b5d6e",
+        ],
+        "smartwatch-active-s2": [
             "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
             "https://images.unsplash.com/photo-1546868871-7041f2a55e12",
         ],
-        [
+        "kamera-mirrorless-travel": [
+            "https://images.unsplash.com/photo-1516035069371-29a1b244cc32",
+            "https://images.unsplash.com/photo-1510127034890-ba27508e9f1c",
+        ],
+        "kopi-arabika-gayo": [
             "https://images.unsplash.com/photo-1447933601403-0c6688de566e",
             "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085",
         ],
-        [
+        "sambal-cumi-pedas": [
             "https://images.unsplash.com/photo-1601050690597-df0568f70950",
             "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f",
         ],
-        [
+        "granola-madu-kacang": [
             "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38",
             "https://images.unsplash.com/photo-1498837167922-ddd27525d352",
         ],
-    ];
+        "teh-hijau-jasmine-premium": [
+            "https://images.unsplash.com/photo-1556679343-c7306c1976bc",
+            "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9",
+        ],
+        "sofa-minimalis-2-seater": [
+            "https://images.unsplash.com/photo-1555041469-a586c61ea9bc",
+            "https://images.unsplash.com/photo-1540574163026-643ea20ade25",
+        ],
+        "lampu-meja-scandinavian": [
+            "https://images.unsplash.com/photo-1507473885765-e6ed057f782c",
+            "https://images.unsplash.com/photo-1534281307076-6f6a6f4d1e3e",
+        ],
+        "kalung-stainless-minimalis": [
+            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338",
+            "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3",
+        ],
+        "serum-niacinamide-brightening": [
+            "https://images.unsplash.com/photo-1556228578-8c89e6adf883",
+            "https://images.unsplash.com/photo-1556229010-6c3f2c9c0d0d",
+        ],
+        "shampoo-daily-care": [
+            "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b",
+            "https://images.unsplash.com/photo-1585232351009-aa87416fca90",
+        ],
+        "tas-selempang-casual": [
+            "https://images.unsplash.com/photo-1553062407-98eeb64c6a62",
+            "https://images.unsplash.com/photo-1584917865442-de89df76afd3",
+        ],
+        "buku-notebook-hardcover": [
+            "https://images.unsplash.com/photo-1544947950-fa07a98d237f",
+            "https://images.unsplash.com/photo-1519682337058-a94d519337bc",
+        ],
+        "mainan-edukasi-anak": [
+            "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1",
+            "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65",
+        ],
+    };
 
     await prisma.productImage.createMany({
-        data: productIds.flatMap((productId, index) => [
-            {
-                id: uuid(),
-                product_id: productId,
-                image_url: imageUrls[index][0],
-                is_primary: true,
-                sort_order: 0,
-            },
-            {
-                id: uuid(),
-                product_id: productId,
-                image_url: imageUrls[index][1],
-                is_primary: false,
-                sort_order: 1,
-            },
-        ]),
+        data: products.flatMap((product, index) => {
+            const urls = imageUrlBySlug[product.slug];
+
+            if (!urls) {
+                throw new Error(
+                    `Image URL belum tersedia untuk product: ${product.slug}`,
+                );
+            }
+
+            return [
+                {
+                    id: uuid(),
+                    product_id: productIds[index],
+                    image_url: urls[0],
+                    is_primary: true,
+                    sort_order: 0,
+                },
+                {
+                    id: uuid(),
+                    product_id: productIds[index],
+                    image_url: urls[1],
+                    is_primary: false,
+                    sort_order: 1,
+                },
+            ];
+        }),
     });
 
     // =========================================================
@@ -1079,10 +1065,10 @@ async function main() {
     //   50 SellerOrder
     //   100 OrderItem
     //
-    // Semua DELIVERED agar seluruh item bisa memiliki review.
+    // Semua DELIVERED agar item yang dibeli dapat memiliki review.
     //
-    // Produk dalam satu SellerOrder selalu berasal dari Store
-    // yang sama.
+    // Product dipilih dinamis berdasarkan Store agar semua SellerOrder
+    // tetap hanya berisi product dari Store yang sama.
     // =========================================================
 
     const orderRows: {
@@ -1118,84 +1104,26 @@ async function main() {
     }[] = [];
 
     /*
-     * Agar setiap product tepat 10 kali muncul:
-     *
-     * Product 0 -> 10
-     * Product 1 -> 10
-     * ...
-     * Product 9 -> 10
-     *
-     * Untuk product yang berada di store yang sama,
-     * kita kombinasikan secara berpasangan.
+     * Product dipasangkan secara dinamis berdasarkan Store.
+     * Ini membuat seed tetap aman walaupun jumlah product bertambah.
      */
 
-    const orderProductPairs = [
-        // Store 0 - product 0
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
+    const productsByStore = new Map<number, number[]>();
+    products.forEach((product, index) => {
+        const current = productsByStore.get(product.store) ?? [];
+        current.push(index);
+        productsByStore.set(product.store, current);
+    });
 
-        // Store 1 - product 1
-        [1, 1],
-        [1, 1],
-        [1, 1],
-        [1, 1],
-        [1, 1],
-
-        // Store 2 - product 2
-        [2, 2],
-        [2, 2],
-        [2, 2],
-        [2, 2],
-        [2, 2],
-
-        // Store 3 - product 3 & 4
-        [3, 4],
-        [3, 4],
-        [3, 4],
-        [3, 4],
-        [3, 4],
-        [3, 4],
-        [3, 4],
-        [3, 4],
-        [3, 4],
-        [3, 4],
-
-        // Store 4 - product 5
-        [5, 5],
-        [5, 5],
-        [5, 5],
-        [5, 5],
-        [5, 5],
-
-        // Store 5 - product 6
-        [6, 6],
-        [6, 6],
-        [6, 6],
-        [6, 6],
-        [6, 6],
-
-        // Store 6 - product 7 & 9
-        [7, 9],
-        [7, 9],
-        [7, 9],
-        [7, 9],
-        [7, 9],
-        [7, 9],
-        [7, 9],
-        [7, 9],
-        [7, 9],
-        [7, 9],
-
-        // Store 7 - product 8
-        [8, 8],
-        [8, 8],
-        [8, 8],
-        [8, 8],
-        [8, 8],
-    ] as const;
+    const storeGroups = [...productsByStore.values()];
+    const orderProductPairs: [number, number][] = Array.from({ length: 50 }, (_, index) => {
+        const group = storeGroups[index % storeGroups.length];
+        const productIndexA = group[index % group.length];
+        const productIndexB = group.length > 1
+            ? group[(index + 1) % group.length]
+            : productIndexA;
+        return [productIndexA, productIndexB];
+    });
 
     for (let index = 0; index < 50; index++) {
         const userIndex = index % userIds.length;
@@ -1371,7 +1299,7 @@ async function main() {
     // =========================================================
     //
     // 100 OrderItem = 100 Review
-    // Setiap Product = tepat 10 Review.
+    // Review didistribusikan ke product berdasarkan order item.
     //
     // Rating menggunakan DECIMAL(2,1):
     // 4.0 - 4.9
@@ -1423,9 +1351,9 @@ async function main() {
     console.log("3 Seller Businesses");
     console.log("10 Seller Documents");
     console.log("8 Stores");
-    console.log("8 Categories");
-    console.log("10 Products");
-    console.log("20 Product Images");
+    console.log("16 Categories");
+    console.log("24 Products");
+    console.log("48 Product Images");
     console.log("Product Options + Values");
     console.log("Product Variants + Variant Values");
     console.log("10 Carts");
@@ -1437,7 +1365,7 @@ async function main() {
     console.log("50 Shipments");
     console.log("100 Shipment Proofs");
     console.log("100 Reviews");
-    console.log("10 Reviews per Product");
+    console.log("100 Reviews terdistribusi pada 24 Product");
     console.log("==========================================");
 }
 

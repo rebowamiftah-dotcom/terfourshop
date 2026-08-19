@@ -33,12 +33,12 @@ function HeaderContent({ navLinks }: HeaderProps) {
   return (
     <div className="sticky top-0 z-50 w-full bg-black text-white shadow-md">
       <header className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16 md:h-18 gap-4">
+        <div className="flex items-center justify-between h-16 md:h-18 gap-1 sm:gap-4">
           {/* BAGIAN KIRI: LOGO */}
           <Logo
             title="TerfourShop"
             link="/"
-            img="/jason.jpg"
+            img="/logo.jpg"
           />
 
           {/* BAGIAN KANAN: */}
@@ -50,7 +50,7 @@ function HeaderContent({ navLinks }: HeaderProps) {
             {isLoggedIn ? (
               <ImageUser />
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2">
                 <Link
                   href="/registrasi"
                   className="bg-slate-950 text-white font-semibold px-3 py-2 rounded-md hover:text-gray-300 transition-colors hidden lg:block">

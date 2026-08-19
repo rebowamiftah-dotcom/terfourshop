@@ -95,7 +95,7 @@ export default function HeroSection() {
           </Link>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4 sm:gap-12 mt-12 pt-8 border-t border-white/10 w-full max-w-2xl text-slate-300">
+        <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4 sm:gap-12 mt-12 pt-8 w-full max-w-2xl text-slate-300">
           <div className="flex flex-col items-center">
             <p className="text-lg sm:text-2xl font-bold text-white">
               <CountUp from={0} to={42} duration={2} />+

@@ -55,10 +55,7 @@ export default function AboutCyberPage() {
         }
       `}</style>
 
-      {/* MAIN CONTAINER bertema CYBER */}
       <div className="bg-black text-white min-h-screen selection:bg-emerald-500 selection:text-black overflow-hidden relative">
-        
-        {/* BACKGROUND DEKORATIF: GRID & GLOW */}
         <div className="absolute inset-0 z-0 opacity-15"
           style={{
             backgroundImage: `linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px)`,
@@ -69,8 +66,7 @@ export default function AboutCyberPage() {
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-950/20 rounded-full blur-[140px] pointer-events-none z-0" />
 
         <main className="max-w-7xl mx-auto px-6 py-20 relative z-10 space-y-24">
-          
-          {/* 1. HERO SECTION */}
+          {/* HERO SECTION */}
           <motion.section 
             initial="hidden"
             animate="visible"
@@ -80,11 +76,9 @@ export default function AboutCyberPage() {
             <span className="inline-block text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-950/50 px-4 py-1.5 rounded-full border border-emerald-700 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
               $~ System Protocol: Core Team & History
             </span>
-            
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-tight">
               Di Balik <span className="relative inline-block cyber-glitch" data-text="TerfourShop">TerfourShop</span>
             </h1>
-            
             <p className="text-zinc-400 text-lg md:text-xl max-w-3xl mx-auto font-light leading-relaxed">
               Arsitek fungsionalitas dan estetika minimalis modern. Mengenal tim inti dan prinsip operasional kami.
             </p>
@@ -93,7 +87,7 @@ export default function AboutCyberPage() {
           {/* List Profil Anggota Pengembang */}
           <CardProfileList />
 
-          {/* 3. SECTION KISAH TERFOURSHOP (SEKARANG DI BAWAH CARDS) */}
+          {/* SECTION KISAH TERFOURSHOP (SEKARANG DI BAWAH CARDS) */}
           <motion.section 
             initial="hidden"
             whileInView="visible"
